@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "CineLink",
+    "slug": "cinelink",
+    "scheme": "cinelink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./public/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#020617"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cinelink.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/assets/adaptive-icon.png",
+        "backgroundColor": "#020617"
+      },
+      "package": "com.cinelink.app"
+    },
+    "web": {
+      "favicon": "./public/assets/favicon.png",
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cinelink-project-id"
+      }
+    }
+  }
+}

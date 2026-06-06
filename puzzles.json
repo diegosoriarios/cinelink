@@ -1,0 +1,2557 @@
+[
+  {
+    "date": "2026-01-01",
+    "startId": 1813,
+    "startName": "Anne Hathaway",
+    "endId": 56734,
+    "endName": "Margot Robbie"
+  },
+  {
+    "date": "2026-01-02",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-01-03",
+    "startId": 85,
+    "startName": "Johnny Depp",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-01-04",
+    "startId": 11701,
+    "startName": "Angelina Jolie",
+    "endId": 7878,
+    "endName": "Edgar Wright"
+  },
+  {
+    "date": "2026-01-05",
+    "startId": 10859,
+    "startName": "Ryan Reynolds",
+    "endId": 935,
+    "endName": "Jack Nicholson"
+  },
+  {
+    "date": "2026-01-06",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 1625558,
+    "endName": "Pedro Pascal"
+  },
+  {
+    "date": "2026-01-07",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-01-08",
+    "startId": 578,
+    "startName": "Ridley Scott",
+    "endId": 13805,
+    "endName": "Zack Snyder"
+  },
+  {
+    "date": "2026-01-09",
+    "startId": 10850,
+    "startName": "Guillermo del Toro",
+    "endId": 5588,
+    "endName": "Tim Burton"
+  },
+  {
+    "date": "2026-01-10",
+    "startId": 1283,
+    "startName": "Helena Bonham Carter",
+    "endId": 31,
+    "endName": "Tom Hanks"
+  },
+  {
+    "date": "2026-01-11",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 6968,
+    "endName": "Harrison Ford"
+  },
+  {
+    "date": "2026-01-12",
+    "startId": 3063,
+    "startName": "Al Pacino",
+    "endId": 6193,
+    "endName": "Leonardo DiCaprio"
+  },
+  {
+    "date": "2026-01-13",
+    "startId": 82,
+    "startName": "Bruce Willis",
+    "endId": 1136406,
+    "endName": "Anya Taylor-Joy"
+  },
+  {
+    "date": "2026-01-14",
+    "startId": 1378,
+    "startName": "Sofia Coppola",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-01-15",
+    "startId": 2294,
+    "startName": "Bong Joon-ho",
+    "endId": 2887,
+    "endName": "Charlize Theron"
+  },
+  {
+    "date": "2026-01-16",
+    "startId": 5655,
+    "startName": "Peter Jackson",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-01-17",
+    "startId": 23931,
+    "startName": "Amy Adams",
+    "endId": 2231,
+    "endName": "Samuel L. Jackson"
+  },
+  {
+    "date": "2026-01-18",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 22226,
+    "endName": "Ralph Fiennes"
+  },
+  {
+    "date": "2026-01-19",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 138,
+    "endName": "Quentin Tarantino"
+  },
+  {
+    "date": "2026-01-20",
+    "startId": 2710,
+    "startName": "James Cameron",
+    "endId": 1625558,
+    "endName": "Pedro Pascal"
+  },
+  {
+    "date": "2026-01-21",
+    "startId": 73968,
+    "startName": "Zendaya",
+    "endId": 3223,
+    "endName": "Robert Downey Jr."
+  },
+  {
+    "date": "2026-01-22",
+    "startId": 1640,
+    "startName": "Sylvester Stallone",
+    "endId": 63,
+    "endName": "Milla Jovovich"
+  },
+  {
+    "date": "2026-01-23",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 9260,
+    "endName": "Ethan Hawke"
+  },
+  {
+    "date": "2026-01-24",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 14343,
+    "endName": "Millie Bobby Brown"
+  },
+  {
+    "date": "2026-01-25",
+    "startId": 8784,
+    "startName": "Daniel Craig",
+    "endId": 51329,
+    "endName": "Florence Pugh"
+  },
+  {
+    "date": "2026-01-26",
+    "startId": 1223,
+    "startName": "Clint Eastwood",
+    "endId": 10859,
+    "endName": "Ryan Reynolds"
+  },
+  {
+    "date": "2026-01-27",
+    "startId": 5656,
+    "startName": "George Lucas",
+    "endId": 1136406,
+    "endName": "Anya Taylor-Joy"
+  },
+  {
+    "date": "2026-01-28",
+    "startId": 5081,
+    "startName": "Emily Blunt",
+    "endId": 10965,
+    "endName": "Rian Johnson"
+  },
+  {
+    "date": "2026-01-29",
+    "startId": 1100,
+    "startName": "Arnold Schwarzenegger",
+    "endId": 2047,
+    "endName": "Nicolas Cage"
+  },
+  {
+    "date": "2026-01-30",
+    "startId": 9349,
+    "startName": "Javier Bardem",
+    "endId": 1378,
+    "endName": "Sofia Coppola"
+  },
+  {
+    "date": "2026-01-31",
+    "startId": 9273,
+    "startName": "Benedict Cumberbatch",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-02-01",
+    "startId": 10980,
+    "startName": "Daniel Radcliffe",
+    "endId": 137427,
+    "endName": "Denis Villeneuve"
+  },
+  {
+    "date": "2026-02-02",
+    "startId": 6384,
+    "startName": "Keanu Reeves",
+    "endId": 138,
+    "endName": "Quentin Tarantino"
+  },
+  {
+    "date": "2026-02-03",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-02-04",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 85,
+    "endName": "Johnny Depp"
+  },
+  {
+    "date": "2026-02-05",
+    "startId": 887,
+    "startName": "J.J. Abrams",
+    "endId": 12835,
+    "endName": "Vin Diesel"
+  },
+  {
+    "date": "2026-02-06",
+    "startId": 488,
+    "startName": "Steven Spielberg",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-02-07",
+    "startId": 5293,
+    "startName": "Forest Whitaker",
+    "endId": 11856,
+    "endName": "Paul Rudd"
+  },
+  {
+    "date": "2026-02-08",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-02-09",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 73968,
+    "endName": "Zendaya"
+  },
+  {
+    "date": "2026-02-10",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 51329,
+    "endName": "Florence Pugh"
+  },
+  {
+    "date": "2026-02-11",
+    "startId": 2294,
+    "startName": "Bong Joon-ho",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-02-12",
+    "startId": 934,
+    "startName": "Russell Crowe",
+    "endId": 976,
+    "endName": "Jason Statham"
+  },
+  {
+    "date": "2026-02-13",
+    "startId": 5656,
+    "startName": "George Lucas",
+    "endId": 10859,
+    "endName": "Ryan Reynolds"
+  },
+  {
+    "date": "2026-02-14",
+    "startId": 3895,
+    "startName": "Michael Caine",
+    "endId": 2636,
+    "endName": "Paul Thomas Anderson"
+  },
+  {
+    "date": "2026-02-15",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 1378,
+    "endName": "Sofia Coppola"
+  },
+  {
+    "date": "2026-02-16",
+    "startId": 1136406,
+    "startName": "Anya Taylor-Joy",
+    "endId": 63,
+    "endName": "Milla Jovovich"
+  },
+  {
+    "date": "2026-02-17",
+    "startId": 2047,
+    "startName": "Nicolas Cage",
+    "endId": 525,
+    "endName": "Christopher Nolan"
+  },
+  {
+    "date": "2026-02-18",
+    "startId": 1136406,
+    "startName": "Anya Taylor-Joy",
+    "endId": 64,
+    "endName": "Gary Sinise"
+  },
+  {
+    "date": "2026-02-19",
+    "startId": 5657,
+    "startName": "Francis Ford Coppola",
+    "endId": 14343,
+    "endName": "Millie Bobby Brown"
+  },
+  {
+    "date": "2026-02-20",
+    "startId": 2294,
+    "startName": "Bong Joon-ho",
+    "endId": 10297,
+    "endName": "Jessica Chastain"
+  },
+  {
+    "date": "2026-02-21",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 134,
+    "endName": "Mark Hamill"
+  },
+  {
+    "date": "2026-02-22",
+    "startId": 14652,
+    "startName": "Greta Gerwig",
+    "endId": 976,
+    "endName": "Jason Statham"
+  },
+  {
+    "date": "2026-02-23",
+    "startId": 56734,
+    "startName": "Margot Robbie",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-02-24",
+    "startId": 2888,
+    "startName": "Will Smith",
+    "endId": 2525,
+    "endName": "Antonio Banderas"
+  },
+  {
+    "date": "2026-02-25",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-02-26",
+    "startId": 2047,
+    "startName": "Nicolas Cage",
+    "endId": 3063,
+    "endName": "Al Pacino"
+  },
+  {
+    "date": "2026-02-27",
+    "startId": 4495,
+    "startName": "Ben Affleck",
+    "endId": 8784,
+    "endName": "Daniel Craig"
+  },
+  {
+    "date": "2026-02-28",
+    "startId": 9273,
+    "startName": "Benedict Cumberbatch",
+    "endId": 192,
+    "endName": "Morgan Freeman"
+  },
+  {
+    "date": "2026-03-01",
+    "startId": 541,
+    "startName": "David Lynch",
+    "endId": 14343,
+    "endName": "Millie Bobby Brown"
+  },
+  {
+    "date": "2026-03-02",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 1896,
+    "endName": "Cate Blanchett"
+  },
+  {
+    "date": "2026-03-03",
+    "startId": 16828,
+    "startName": "Chris Evans",
+    "endId": 3063,
+    "endName": "Al Pacino"
+  },
+  {
+    "date": "2026-03-04",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 31,
+    "endName": "Tom Hanks"
+  },
+  {
+    "date": "2026-03-05",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-03-06",
+    "startId": 1245,
+    "startName": "Scarlett Johansson",
+    "endId": 2037,
+    "endName": "Cameron Diaz"
+  },
+  {
+    "date": "2026-03-07",
+    "startId": 18918,
+    "startName": "Dwayne Johnson",
+    "endId": 1813,
+    "endName": "Anne Hathaway"
+  },
+  {
+    "date": "2026-03-08",
+    "startId": 10850,
+    "startName": "Guillermo del Toro",
+    "endId": 54693,
+    "endName": "Emma Stone"
+  },
+  {
+    "date": "2026-03-09",
+    "startId": 206,
+    "startName": "Jim Carrey",
+    "endId": 3,
+    "endName": "Harrison Ford"
+  },
+  {
+    "date": "2026-03-10",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 41292,
+    "endName": "Saoirse Ronan"
+  },
+  {
+    "date": "2026-03-11",
+    "startId": 1378,
+    "startName": "Sofia Coppola",
+    "endId": 1223,
+    "endName": "Clint Eastwood"
+  },
+  {
+    "date": "2026-03-12",
+    "startId": 1032,
+    "startName": "Martin Scorsese",
+    "endId": 19278,
+    "endName": "Chris Hemsworth"
+  },
+  {
+    "date": "2026-03-13",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 11701,
+    "endName": "Angelina Jolie"
+  },
+  {
+    "date": "2026-03-14",
+    "startId": 10980,
+    "startName": "Daniel Radcliffe",
+    "endId": 10859,
+    "endName": "Ryan Reynolds"
+  },
+  {
+    "date": "2026-03-15",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 131,
+    "endName": "Jake Gyllenhaal"
+  },
+  {
+    "date": "2026-03-16",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 10965,
+    "endName": "Rian Johnson"
+  },
+  {
+    "date": "2026-03-17",
+    "startId": 71580,
+    "startName": "Tom Holland",
+    "endId": 8787,
+    "endName": "Mahershala Ali"
+  },
+  {
+    "date": "2026-03-18",
+    "startId": 2887,
+    "startName": "Charlize Theron",
+    "endId": 6193,
+    "endName": "Leonardo DiCaprio"
+  },
+  {
+    "date": "2026-03-19",
+    "startId": 4432,
+    "startName": "David Tennant",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-03-20",
+    "startId": 2231,
+    "startName": "Samuel L. Jackson",
+    "endId": 6384,
+    "endName": "Keanu Reeves"
+  },
+  {
+    "date": "2026-03-21",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-03-22",
+    "startId": 3223,
+    "startName": "Robert Downey Jr.",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-03-23",
+    "startId": 82,
+    "startName": "Bruce Willis",
+    "endId": 35,
+    "endName": "Will Ferrell"
+  },
+  {
+    "date": "2026-03-24",
+    "startId": 3111,
+    "startName": "Sam Mendes",
+    "endId": 1813,
+    "endName": "Anne Hathaway"
+  },
+  {
+    "date": "2026-03-25",
+    "startId": 14343,
+    "startName": "Millie Bobby Brown",
+    "endId": 64,
+    "endName": "Gary Sinise"
+  },
+  {
+    "date": "2026-03-26",
+    "startId": 2294,
+    "startName": "Bong Joon-ho",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-03-27",
+    "startId": 71580,
+    "startName": "Tom Holland",
+    "endId": 10447,
+    "endName": "Kirsten Dunst"
+  },
+  {
+    "date": "2026-03-28",
+    "startId": 10859,
+    "startName": "Ryan Reynolds",
+    "endId": 12835,
+    "endName": "Vin Diesel"
+  },
+  {
+    "date": "2026-03-29",
+    "startId": 934,
+    "startName": "Russell Crowe",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-03-30",
+    "startId": 1892,
+    "startName": "Matt Damon",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-03-31",
+    "startId": 12891,
+    "startName": "Taika Waititi",
+    "endId": 6384,
+    "endName": "Keanu Reeves"
+  },
+  {
+    "date": "2026-04-01",
+    "startId": 3063,
+    "startName": "Al Pacino",
+    "endId": 1769,
+    "endName": "Spike Lee"
+  },
+  {
+    "date": "2026-04-02",
+    "startId": 10850,
+    "startName": "Guillermo del Toro",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-04-03",
+    "startId": 30614,
+    "startName": "Ryan Gosling",
+    "endId": 9273,
+    "endName": "Benedict Cumberbatch"
+  },
+  {
+    "date": "2026-04-04",
+    "startId": 5656,
+    "startName": "George Lucas",
+    "endId": 500,
+    "endName": "Robert De Niro"
+  },
+  {
+    "date": "2026-04-05",
+    "startId": 10980,
+    "startName": "Daniel Radcliffe",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-04-06",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 5656,
+    "endName": "George Lucas"
+  },
+  {
+    "date": "2026-04-07",
+    "startId": 19278,
+    "startName": "Chris Hemsworth",
+    "endId": 131,
+    "endName": "Jake Gyllenhaal"
+  },
+  {
+    "date": "2026-04-08",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 8691,
+    "endName": "Cillian Murphy"
+  },
+  {
+    "date": "2026-04-09",
+    "startId": 2524,
+    "startName": "Tom Cruise",
+    "endId": 2047,
+    "endName": "Nicolas Cage"
+  },
+  {
+    "date": "2026-04-10",
+    "startId": 13805,
+    "startName": "Zack Snyder",
+    "endId": 137427,
+    "endName": "Denis Villeneuve"
+  },
+  {
+    "date": "2026-04-11",
+    "startId": 1152,
+    "startName": "Christopher Columbus",
+    "endId": 1100,
+    "endName": "Arnold Schwarzenegger"
+  },
+  {
+    "date": "2026-04-12",
+    "startId": 1152,
+    "startName": "Christopher Columbus",
+    "endId": 17051,
+    "endName": "Hugh Jackman"
+  },
+  {
+    "date": "2026-04-13",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 2888,
+    "endName": "Will Smith"
+  },
+  {
+    "date": "2026-04-14",
+    "startId": 13861,
+    "startName": "Wes Anderson",
+    "endId": 18277,
+    "endName": "Sandra Bullock"
+  },
+  {
+    "date": "2026-04-15",
+    "startId": 12835,
+    "startName": "Vin Diesel",
+    "endId": 31,
+    "endName": "Tom Hanks"
+  },
+  {
+    "date": "2026-04-16",
+    "startId": 5656,
+    "startName": "George Lucas",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-04-17",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 1331,
+    "endName": "Shia LaBeouf"
+  },
+  {
+    "date": "2026-04-18",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 14652,
+    "endName": "Greta Gerwig"
+  },
+  {
+    "date": "2026-04-19",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 4495,
+    "endName": "Ben Affleck"
+  },
+  {
+    "date": "2026-04-20",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 13861,
+    "endName": "Wes Anderson"
+  },
+  {
+    "date": "2026-04-21",
+    "startId": 131,
+    "startName": "Jake Gyllenhaal",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-04-22",
+    "startId": 1625558,
+    "startName": "Pedro Pascal",
+    "endId": 1152,
+    "endName": "Christopher Columbus"
+  },
+  {
+    "date": "2026-04-23",
+    "startId": 2710,
+    "startName": "James Cameron",
+    "endId": 17051,
+    "endName": "Hugh Jackman"
+  },
+  {
+    "date": "2026-04-24",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 10850,
+    "endName": "Guillermo del Toro"
+  },
+  {
+    "date": "2026-04-25",
+    "startId": 9349,
+    "startName": "Javier Bardem",
+    "endId": 578,
+    "endName": "Ridley Scott"
+  },
+  {
+    "date": "2026-04-26",
+    "startId": 2047,
+    "startName": "Nicolas Cage",
+    "endId": 2888,
+    "endName": "Will Smith"
+  },
+  {
+    "date": "2026-04-27",
+    "startId": 16483,
+    "startName": "Joaquin Phoenix",
+    "endId": 85,
+    "endName": "Johnny Depp"
+  },
+  {
+    "date": "2026-04-28",
+    "startId": 10828,
+    "startName": "Guy Ritchie",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-04-29",
+    "startId": 2227,
+    "startName": "Nicole Kidman",
+    "endId": 85,
+    "endName": "Johnny Depp"
+  },
+  {
+    "date": "2026-04-30",
+    "startId": 17051,
+    "startName": "Hugh Jackman",
+    "endId": 10447,
+    "endName": "Kirsten Dunst"
+  },
+  {
+    "date": "2026-05-01",
+    "startId": 1223,
+    "startName": "Clint Eastwood",
+    "endId": 7878,
+    "endName": "Edgar Wright"
+  },
+  {
+    "date": "2026-05-02",
+    "startId": 28782,
+    "startName": "Gal Gadot",
+    "endId": 8691,
+    "endName": "Cillian Murphy"
+  },
+  {
+    "date": "2026-05-03",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 1625558,
+    "endName": "Pedro Pascal"
+  },
+  {
+    "date": "2026-05-04",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 116,
+    "endName": "Gary Oldman"
+  },
+  {
+    "date": "2026-05-05",
+    "startId": 56734,
+    "startName": "Margot Robbie",
+    "endId": 13805,
+    "endName": "Zack Snyder"
+  },
+  {
+    "date": "2026-05-06",
+    "startId": 3895,
+    "startName": "Michael Caine",
+    "endId": 4690,
+    "endName": "Rachel McAdams"
+  },
+  {
+    "date": "2026-05-07",
+    "startId": 2710,
+    "startName": "James Cameron",
+    "endId": 2037,
+    "endName": "Cameron Diaz"
+  },
+  {
+    "date": "2026-05-08",
+    "startId": 287,
+    "startName": "Brad Pitt",
+    "endId": 1378,
+    "endName": "Sofia Coppola"
+  },
+  {
+    "date": "2026-05-09",
+    "startId": 9260,
+    "startName": "Ethan Hawke",
+    "endId": 56734,
+    "endName": "Margot Robbie"
+  },
+  {
+    "date": "2026-05-10",
+    "startId": 10859,
+    "startName": "Ryan Reynolds",
+    "endId": 64,
+    "endName": "Gary Sinise"
+  },
+  {
+    "date": "2026-05-11",
+    "startId": 5293,
+    "startName": "Forest Whitaker",
+    "endId": 5656,
+    "endName": "George Lucas"
+  },
+  {
+    "date": "2026-05-12",
+    "startId": 51329,
+    "startName": "Florence Pugh",
+    "endId": 82,
+    "endName": "Bruce Willis"
+  },
+  {
+    "date": "2026-05-13",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-05-14",
+    "startId": 3894,
+    "startName": "Christian Bale",
+    "endId": 7467,
+    "endName": "David Fincher"
+  },
+  {
+    "date": "2026-05-15",
+    "startId": 2710,
+    "startName": "James Cameron",
+    "endId": 10297,
+    "endName": "Jessica Chastain"
+  },
+  {
+    "date": "2026-05-16",
+    "startId": 5656,
+    "startName": "George Lucas",
+    "endId": 3223,
+    "endName": "Robert Downey Jr."
+  },
+  {
+    "date": "2026-05-17",
+    "startId": 6968,
+    "startName": "Harrison Ford",
+    "endId": 525,
+    "endName": "Christopher Nolan"
+  },
+  {
+    "date": "2026-05-18",
+    "startId": 1331,
+    "startName": "Shia LaBeouf",
+    "endId": 976,
+    "endName": "Jason Statham"
+  },
+  {
+    "date": "2026-05-19",
+    "startId": 5588,
+    "startName": "Tim Burton",
+    "endId": 2636,
+    "endName": "Paul Thomas Anderson"
+  },
+  {
+    "date": "2026-05-20",
+    "startId": 35,
+    "startName": "Will Ferrell",
+    "endId": 5588,
+    "endName": "Tim Burton"
+  },
+  {
+    "date": "2026-05-21",
+    "startId": 8691,
+    "startName": "Cillian Murphy",
+    "endId": 56734,
+    "endName": "Margot Robbie"
+  },
+  {
+    "date": "2026-05-22",
+    "startId": 500,
+    "startName": "Robert De Niro",
+    "endId": 54693,
+    "endName": "Emma Stone"
+  },
+  {
+    "date": "2026-05-23",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 131,
+    "endName": "Jake Gyllenhaal"
+  },
+  {
+    "date": "2026-05-24",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 10859,
+    "endName": "Ryan Reynolds"
+  },
+  {
+    "date": "2026-05-25",
+    "startId": 10980,
+    "startName": "Daniel Radcliffe",
+    "endId": 4495,
+    "endName": "Ben Affleck"
+  },
+  {
+    "date": "2026-05-26",
+    "startId": 134,
+    "startName": "Mark Hamill",
+    "endId": 2710,
+    "endName": "James Cameron"
+  },
+  {
+    "date": "2026-05-27",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 82,
+    "endName": "Bruce Willis"
+  },
+  {
+    "date": "2026-05-28",
+    "startId": 887,
+    "startName": "J.J. Abrams",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-05-29",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 16828,
+    "endName": "Chris Evans"
+  },
+  {
+    "date": "2026-05-30",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 9273,
+    "endName": "Benedict Cumberbatch"
+  },
+  {
+    "date": "2026-05-31",
+    "startId": 56734,
+    "startName": "Margot Robbie",
+    "endId": 19278,
+    "endName": "Chris Hemsworth"
+  },
+  {
+    "date": "2026-06-01",
+    "startId": 10447,
+    "startName": "Kirsten Dunst",
+    "endId": 524,
+    "endName": "Natalie Portman"
+  },
+  {
+    "date": "2026-06-02",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 287,
+    "endName": "Brad Pitt"
+  },
+  {
+    "date": "2026-06-03",
+    "startId": 5657,
+    "startName": "Francis Ford Coppola",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-06-04",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 2047,
+    "endName": "Nicolas Cage"
+  },
+  {
+    "date": "2026-06-05",
+    "startId": 18897,
+    "startName": "Jackie Chan",
+    "endId": 23931,
+    "endName": "Amy Adams"
+  },
+  {
+    "date": "2026-06-06",
+    "startId": 5655,
+    "startName": "Peter Jackson",
+    "endId": 56734,
+    "endName": "Margot Robbie"
+  },
+  {
+    "date": "2026-06-07",
+    "startId": 3894,
+    "startName": "Christian Bale",
+    "endId": 134,
+    "endName": "Mark Hamill"
+  },
+  {
+    "date": "2026-06-08",
+    "startId": 2227,
+    "startName": "Nicole Kidman",
+    "endId": 18918,
+    "endName": "Dwayne Johnson"
+  },
+  {
+    "date": "2026-06-09",
+    "startId": 11701,
+    "startName": "Angelina Jolie",
+    "endId": 5293,
+    "endName": "Forest Whitaker"
+  },
+  {
+    "date": "2026-06-10",
+    "startId": 71580,
+    "startName": "Tom Holland",
+    "endId": 1378,
+    "endName": "Sofia Coppola"
+  },
+  {
+    "date": "2026-06-11",
+    "startId": 5655,
+    "startName": "Peter Jackson",
+    "endId": 541,
+    "endName": "David Lynch"
+  },
+  {
+    "date": "2026-06-12",
+    "startId": 138,
+    "startName": "Quentin Tarantino",
+    "endId": 63,
+    "endName": "Milla Jovovich"
+  },
+  {
+    "date": "2026-06-13",
+    "startId": 1152,
+    "startName": "Christopher Columbus",
+    "endId": 12835,
+    "endName": "Vin Diesel"
+  },
+  {
+    "date": "2026-06-14",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 14652,
+    "endName": "Greta Gerwig"
+  },
+  {
+    "date": "2026-06-15",
+    "startId": 17051,
+    "startName": "Hugh Jackman",
+    "endId": 18897,
+    "endName": "Jackie Chan"
+  },
+  {
+    "date": "2026-06-16",
+    "startId": 1640,
+    "startName": "Sylvester Stallone",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-06-17",
+    "startId": 3895,
+    "startName": "Michael Caine",
+    "endId": 117642,
+    "endName": "Brie Larson"
+  },
+  {
+    "date": "2026-06-18",
+    "startId": 7878,
+    "startName": "Edgar Wright",
+    "endId": 7879,
+    "endName": "Damien Chazelle"
+  },
+  {
+    "date": "2026-06-19",
+    "startId": 1896,
+    "startName": "Cate Blanchett",
+    "endId": 71580,
+    "endName": "Tom Holland"
+  },
+  {
+    "date": "2026-06-20",
+    "startId": 31,
+    "startName": "Tom Hanks",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-06-21",
+    "startId": 14652,
+    "startName": "Greta Gerwig",
+    "endId": 8787,
+    "endName": "Mahershala Ali"
+  },
+  {
+    "date": "2026-06-22",
+    "startId": 488,
+    "startName": "Steven Spielberg",
+    "endId": 1896,
+    "endName": "Cate Blanchett"
+  },
+  {
+    "date": "2026-06-23",
+    "startId": 1152,
+    "startName": "Christopher Columbus",
+    "endId": 287,
+    "endName": "Brad Pitt"
+  },
+  {
+    "date": "2026-06-24",
+    "startId": 1640,
+    "startName": "Sylvester Stallone",
+    "endId": 54693,
+    "endName": "Emma Stone"
+  },
+  {
+    "date": "2026-06-25",
+    "startId": 19278,
+    "startName": "Chris Hemsworth",
+    "endId": 2710,
+    "endName": "James Cameron"
+  },
+  {
+    "date": "2026-06-26",
+    "startId": 7467,
+    "startName": "David Fincher",
+    "endId": 2888,
+    "endName": "Will Smith"
+  },
+  {
+    "date": "2026-06-27",
+    "startId": 541,
+    "startName": "David Lynch",
+    "endId": 500,
+    "endName": "Robert De Niro"
+  },
+  {
+    "date": "2026-06-28",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 18277,
+    "endName": "Sandra Bullock"
+  },
+  {
+    "date": "2026-06-29",
+    "startId": 488,
+    "startName": "Steven Spielberg",
+    "endId": 41292,
+    "endName": "Saoirse Ronan"
+  },
+  {
+    "date": "2026-06-30",
+    "startId": 5081,
+    "startName": "Emily Blunt",
+    "endId": 2887,
+    "endName": "Charlize Theron"
+  },
+  {
+    "date": "2026-07-01",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 2294,
+    "endName": "Bong Joon-ho"
+  },
+  {
+    "date": "2026-07-02",
+    "startId": 578,
+    "startName": "Ridley Scott",
+    "endId": 4432,
+    "endName": "David Tennant"
+  },
+  {
+    "date": "2026-07-03",
+    "startId": 1892,
+    "startName": "Matt Damon",
+    "endId": 7467,
+    "endName": "David Fincher"
+  },
+  {
+    "date": "2026-07-04",
+    "startId": 10447,
+    "startName": "Kirsten Dunst",
+    "endId": 134,
+    "endName": "Mark Hamill"
+  },
+  {
+    "date": "2026-07-05",
+    "startId": 131,
+    "startName": "Jake Gyllenhaal",
+    "endId": 541,
+    "endName": "David Lynch"
+  },
+  {
+    "date": "2026-07-06",
+    "startId": 5655,
+    "startName": "Peter Jackson",
+    "endId": 2227,
+    "endName": "Nicole Kidman"
+  },
+  {
+    "date": "2026-07-07",
+    "startId": 6193,
+    "startName": "Leonardo DiCaprio",
+    "endId": 13861,
+    "endName": "Wes Anderson"
+  },
+  {
+    "date": "2026-07-08",
+    "startId": 4690,
+    "startName": "Rachel McAdams",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-07-09",
+    "startId": 8784,
+    "startName": "Daniel Craig",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-07-10",
+    "startId": 541,
+    "startName": "David Lynch",
+    "endId": 13805,
+    "endName": "Zack Snyder"
+  },
+  {
+    "date": "2026-07-11",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-07-12",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-07-13",
+    "startId": 5588,
+    "startName": "Tim Burton",
+    "endId": 31,
+    "endName": "Tom Hanks"
+  },
+  {
+    "date": "2026-07-14",
+    "startId": 12891,
+    "startName": "Taika Waititi",
+    "endId": 1640,
+    "endName": "Sylvester Stallone"
+  },
+  {
+    "date": "2026-07-15",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 71580,
+    "endName": "Tom Holland"
+  },
+  {
+    "date": "2026-07-16",
+    "startId": 1813,
+    "startName": "Anne Hathaway",
+    "endId": 116,
+    "endName": "Gary Oldman"
+  },
+  {
+    "date": "2026-07-17",
+    "startId": 14343,
+    "startName": "Millie Bobby Brown",
+    "endId": 1813,
+    "endName": "Anne Hathaway"
+  },
+  {
+    "date": "2026-07-18",
+    "startId": 18918,
+    "startName": "Dwayne Johnson",
+    "endId": 14652,
+    "endName": "Greta Gerwig"
+  },
+  {
+    "date": "2026-07-19",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 82,
+    "endName": "Bruce Willis"
+  },
+  {
+    "date": "2026-07-20",
+    "startId": 10965,
+    "startName": "Rian Johnson",
+    "endId": 41292,
+    "endName": "Saoirse Ronan"
+  },
+  {
+    "date": "2026-07-21",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 2294,
+    "endName": "Bong Joon-ho"
+  },
+  {
+    "date": "2026-07-22",
+    "startId": 14343,
+    "startName": "Millie Bobby Brown",
+    "endId": 13805,
+    "endName": "Zack Snyder"
+  },
+  {
+    "date": "2026-07-23",
+    "startId": 73968,
+    "startName": "Zendaya",
+    "endId": 2047,
+    "endName": "Nicolas Cage"
+  },
+  {
+    "date": "2026-07-24",
+    "startId": 3111,
+    "startName": "Sam Mendes",
+    "endId": 7878,
+    "endName": "Edgar Wright"
+  },
+  {
+    "date": "2026-07-25",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 14343,
+    "endName": "Millie Bobby Brown"
+  },
+  {
+    "date": "2026-07-26",
+    "startId": 2524,
+    "startName": "Tom Cruise",
+    "endId": 934,
+    "endName": "Russell Crowe"
+  },
+  {
+    "date": "2026-07-27",
+    "startId": 11701,
+    "startName": "Angelina Jolie",
+    "endId": 1223,
+    "endName": "Clint Eastwood"
+  },
+  {
+    "date": "2026-07-28",
+    "startId": 7879,
+    "startName": "Damien Chazelle",
+    "endId": 116,
+    "endName": "Gary Oldman"
+  },
+  {
+    "date": "2026-07-29",
+    "startId": 1896,
+    "startName": "Cate Blanchett",
+    "endId": 14652,
+    "endName": "Greta Gerwig"
+  },
+  {
+    "date": "2026-07-30",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 10447,
+    "endName": "Kirsten Dunst"
+  },
+  {
+    "date": "2026-07-31",
+    "startId": 5655,
+    "startName": "Peter Jackson",
+    "endId": 9349,
+    "endName": "Javier Bardem"
+  },
+  {
+    "date": "2026-08-01",
+    "startId": 134,
+    "startName": "Mark Hamill",
+    "endId": 7467,
+    "endName": "David Fincher"
+  },
+  {
+    "date": "2026-08-02",
+    "startId": 14652,
+    "startName": "Greta Gerwig",
+    "endId": 1813,
+    "endName": "Anne Hathaway"
+  },
+  {
+    "date": "2026-08-03",
+    "startId": 56734,
+    "startName": "Margot Robbie",
+    "endId": 206,
+    "endName": "Jim Carrey"
+  },
+  {
+    "date": "2026-08-04",
+    "startId": 16828,
+    "startName": "Chris Evans",
+    "endId": 22226,
+    "endName": "Ralph Fiennes"
+  },
+  {
+    "date": "2026-08-05",
+    "startId": 206,
+    "startName": "Jim Carrey",
+    "endId": 976,
+    "endName": "Jason Statham"
+  },
+  {
+    "date": "2026-08-06",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 2710,
+    "endName": "James Cameron"
+  },
+  {
+    "date": "2026-08-07",
+    "startId": 1331,
+    "startName": "Shia LaBeouf",
+    "endId": 5293,
+    "endName": "Forest Whitaker"
+  },
+  {
+    "date": "2026-08-08",
+    "startId": 2888,
+    "startName": "Will Smith",
+    "endId": 5293,
+    "endName": "Forest Whitaker"
+  },
+  {
+    "date": "2026-08-09",
+    "startId": 14343,
+    "startName": "Millie Bobby Brown",
+    "endId": 3111,
+    "endName": "Sam Mendes"
+  },
+  {
+    "date": "2026-08-10",
+    "startId": 5293,
+    "startName": "Forest Whitaker",
+    "endId": 13861,
+    "endName": "Wes Anderson"
+  },
+  {
+    "date": "2026-08-11",
+    "startId": 23931,
+    "startName": "Amy Adams",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-08-12",
+    "startId": 3,
+    "startName": "Harrison Ford",
+    "endId": 10828,
+    "endName": "Guy Ritchie"
+  },
+  {
+    "date": "2026-08-13",
+    "startId": 1331,
+    "startName": "Shia LaBeouf",
+    "endId": 3894,
+    "endName": "Christian Bale"
+  },
+  {
+    "date": "2026-08-14",
+    "startId": 1032,
+    "startName": "Martin Scorsese",
+    "endId": 2524,
+    "endName": "Tom Cruise"
+  },
+  {
+    "date": "2026-08-15",
+    "startId": 6193,
+    "startName": "Leonardo DiCaprio",
+    "endId": 206,
+    "endName": "Jim Carrey"
+  },
+  {
+    "date": "2026-08-16",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 2037,
+    "endName": "Cameron Diaz"
+  },
+  {
+    "date": "2026-08-17",
+    "startId": 13805,
+    "startName": "Zack Snyder",
+    "endId": 2636,
+    "endName": "Paul Thomas Anderson"
+  },
+  {
+    "date": "2026-08-18",
+    "startId": 887,
+    "startName": "J.J. Abrams",
+    "endId": 9273,
+    "endName": "Benedict Cumberbatch"
+  },
+  {
+    "date": "2026-08-19",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 206,
+    "endName": "Jim Carrey"
+  },
+  {
+    "date": "2026-08-20",
+    "startId": 3896,
+    "startName": "Liam Neeson",
+    "endId": 500,
+    "endName": "Robert De Niro"
+  },
+  {
+    "date": "2026-08-21",
+    "startId": 1152,
+    "startName": "Christopher Columbus",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-08-22",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 17051,
+    "endName": "Hugh Jackman"
+  },
+  {
+    "date": "2026-08-23",
+    "startId": 1640,
+    "startName": "Sylvester Stallone",
+    "endId": 1245,
+    "endName": "Scarlett Johansson"
+  },
+  {
+    "date": "2026-08-24",
+    "startId": 30614,
+    "startName": "Ryan Gosling",
+    "endId": 239019,
+    "endName": "Timothée Chalamet"
+  },
+  {
+    "date": "2026-08-25",
+    "startId": 5293,
+    "startName": "Forest Whitaker",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-08-26",
+    "startId": 1245,
+    "startName": "Scarlett Johansson",
+    "endId": 9349,
+    "endName": "Javier Bardem"
+  },
+  {
+    "date": "2026-08-27",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 82,
+    "endName": "Bruce Willis"
+  },
+  {
+    "date": "2026-08-28",
+    "startId": 578,
+    "startName": "Ridley Scott",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-08-29",
+    "startId": 12835,
+    "startName": "Vin Diesel",
+    "endId": 3111,
+    "endName": "Sam Mendes"
+  },
+  {
+    "date": "2026-08-30",
+    "startId": 11856,
+    "startName": "Paul Rudd",
+    "endId": 134,
+    "endName": "Mark Hamill"
+  },
+  {
+    "date": "2026-08-31",
+    "startId": 9273,
+    "startName": "Benedict Cumberbatch",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-09-01",
+    "startId": 3896,
+    "startName": "Liam Neeson",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-09-02",
+    "startId": 28782,
+    "startName": "Gal Gadot",
+    "endId": 287,
+    "endName": "Brad Pitt"
+  },
+  {
+    "date": "2026-09-03",
+    "startId": 19278,
+    "startName": "Chris Hemsworth",
+    "endId": 500,
+    "endName": "Robert De Niro"
+  },
+  {
+    "date": "2026-09-04",
+    "startId": 63,
+    "startName": "Milla Jovovich",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-09-05",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-09-06",
+    "startId": 578,
+    "startName": "Ridley Scott",
+    "endId": 9260,
+    "endName": "Ethan Hawke"
+  },
+  {
+    "date": "2026-09-07",
+    "startId": 35,
+    "startName": "Will Ferrell",
+    "endId": 18277,
+    "endName": "Sandra Bullock"
+  },
+  {
+    "date": "2026-09-08",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 1896,
+    "endName": "Cate Blanchett"
+  },
+  {
+    "date": "2026-09-09",
+    "startId": 1223,
+    "startName": "Clint Eastwood",
+    "endId": 192,
+    "endName": "Morgan Freeman"
+  },
+  {
+    "date": "2026-09-10",
+    "startId": 1032,
+    "startName": "Martin Scorsese",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-09-11",
+    "startId": 134,
+    "startName": "Mark Hamill",
+    "endId": 103,
+    "endName": "Mark Ruffalo"
+  },
+  {
+    "date": "2026-09-12",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 8787,
+    "endName": "Mahershala Ali"
+  },
+  {
+    "date": "2026-09-13",
+    "startId": 1136406,
+    "startName": "Anya Taylor-Joy",
+    "endId": 56734,
+    "endName": "Margot Robbie"
+  },
+  {
+    "date": "2026-09-14",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 1223,
+    "endName": "Clint Eastwood"
+  },
+  {
+    "date": "2026-09-15",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 2524,
+    "endName": "Tom Cruise"
+  },
+  {
+    "date": "2026-09-16",
+    "startId": 10828,
+    "startName": "Guy Ritchie",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-09-17",
+    "startId": 1769,
+    "startName": "Spike Lee",
+    "endId": 1100,
+    "endName": "Arnold Schwarzenegger"
+  },
+  {
+    "date": "2026-09-18",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 1769,
+    "endName": "Spike Lee"
+  },
+  {
+    "date": "2026-09-19",
+    "startId": 1283,
+    "startName": "Helena Bonham Carter",
+    "endId": 5292,
+    "endName": "Denzel Washington"
+  },
+  {
+    "date": "2026-09-20",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 1100,
+    "endName": "Arnold Schwarzenegger"
+  },
+  {
+    "date": "2026-09-21",
+    "startId": 1223,
+    "startName": "Clint Eastwood",
+    "endId": 206,
+    "endName": "Jim Carrey"
+  },
+  {
+    "date": "2026-09-22",
+    "startId": 13805,
+    "startName": "Zack Snyder",
+    "endId": 1769,
+    "endName": "Spike Lee"
+  },
+  {
+    "date": "2026-09-23",
+    "startId": 19278,
+    "startName": "Chris Hemsworth",
+    "endId": 22226,
+    "endName": "Ralph Fiennes"
+  },
+  {
+    "date": "2026-09-24",
+    "startId": 2178,
+    "startName": "Ron Howard",
+    "endId": 3896,
+    "endName": "Liam Neeson"
+  },
+  {
+    "date": "2026-09-25",
+    "startId": 2037,
+    "startName": "Cameron Diaz",
+    "endId": 1032,
+    "endName": "Martin Scorsese"
+  },
+  {
+    "date": "2026-09-26",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 138,
+    "endName": "Quentin Tarantino"
+  },
+  {
+    "date": "2026-09-27",
+    "startId": 71580,
+    "startName": "Tom Holland",
+    "endId": 578,
+    "endName": "Ridley Scott"
+  },
+  {
+    "date": "2026-09-28",
+    "startId": 16828,
+    "startName": "Chris Evans",
+    "endId": 10980,
+    "endName": "Daniel Radcliffe"
+  },
+  {
+    "date": "2026-09-29",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 134,
+    "endName": "Mark Hamill"
+  },
+  {
+    "date": "2026-09-30",
+    "startId": 1625558,
+    "startName": "Pedro Pascal",
+    "endId": 3894,
+    "endName": "Christian Bale"
+  },
+  {
+    "date": "2026-10-01",
+    "startId": 1223,
+    "startName": "Clint Eastwood",
+    "endId": 287,
+    "endName": "Brad Pitt"
+  },
+  {
+    "date": "2026-10-02",
+    "startId": 35,
+    "startName": "Will Ferrell",
+    "endId": 137427,
+    "endName": "Denis Villeneuve"
+  },
+  {
+    "date": "2026-10-03",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 525,
+    "endName": "Christopher Nolan"
+  },
+  {
+    "date": "2026-10-04",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 10980,
+    "endName": "Daniel Radcliffe"
+  },
+  {
+    "date": "2026-10-05",
+    "startId": 4495,
+    "startName": "Ben Affleck",
+    "endId": 525,
+    "endName": "Christopher Nolan"
+  },
+  {
+    "date": "2026-10-06",
+    "startId": 6384,
+    "startName": "Keanu Reeves",
+    "endId": 10850,
+    "endName": "Guillermo del Toro"
+  },
+  {
+    "date": "2026-10-07",
+    "startId": 11664,
+    "startName": "Viola Davis",
+    "endId": 935,
+    "endName": "Jack Nicholson"
+  },
+  {
+    "date": "2026-10-08",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 63,
+    "endName": "Milla Jovovich"
+  },
+  {
+    "date": "2026-10-09",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 64,
+    "endName": "Gary Sinise"
+  },
+  {
+    "date": "2026-10-10",
+    "startId": 541,
+    "startName": "David Lynch",
+    "endId": 3896,
+    "endName": "Liam Neeson"
+  },
+  {
+    "date": "2026-10-11",
+    "startId": 16828,
+    "startName": "Chris Evans",
+    "endId": 2710,
+    "endName": "James Cameron"
+  },
+  {
+    "date": "2026-10-12",
+    "startId": 103,
+    "startName": "Mark Ruffalo",
+    "endId": 1892,
+    "endName": "Matt Damon"
+  },
+  {
+    "date": "2026-10-13",
+    "startId": 13861,
+    "startName": "Wes Anderson",
+    "endId": 138,
+    "endName": "Quentin Tarantino"
+  },
+  {
+    "date": "2026-10-14",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 28782,
+    "endName": "Gal Gadot"
+  },
+  {
+    "date": "2026-10-15",
+    "startId": 1331,
+    "startName": "Shia LaBeouf",
+    "endId": 10850,
+    "endName": "Guillermo del Toro"
+  },
+  {
+    "date": "2026-10-16",
+    "startId": 3223,
+    "startName": "Robert Downey Jr.",
+    "endId": 131,
+    "endName": "Jake Gyllenhaal"
+  },
+  {
+    "date": "2026-10-17",
+    "startId": 12891,
+    "startName": "Taika Waititi",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-10-18",
+    "startId": 1283,
+    "startName": "Helena Bonham Carter",
+    "endId": 11701,
+    "endName": "Angelina Jolie"
+  },
+  {
+    "date": "2026-10-19",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 1769,
+    "endName": "Spike Lee"
+  },
+  {
+    "date": "2026-10-20",
+    "startId": 8784,
+    "startName": "Daniel Craig",
+    "endId": 1032,
+    "endName": "Martin Scorsese"
+  },
+  {
+    "date": "2026-10-21",
+    "startId": 8784,
+    "startName": "Daniel Craig",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-10-22",
+    "startId": 138,
+    "startName": "Quentin Tarantino",
+    "endId": 5292,
+    "endName": "Denzel Washington"
+  },
+  {
+    "date": "2026-10-23",
+    "startId": 73968,
+    "startName": "Zendaya",
+    "endId": 2227,
+    "endName": "Nicole Kidman"
+  },
+  {
+    "date": "2026-10-24",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 4690,
+    "endName": "Rachel McAdams"
+  },
+  {
+    "date": "2026-10-25",
+    "startId": 934,
+    "startName": "Russell Crowe",
+    "endId": 72129,
+    "endName": "Jennifer Lawrence"
+  },
+  {
+    "date": "2026-10-26",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 2710,
+    "endName": "James Cameron"
+  },
+  {
+    "date": "2026-10-27",
+    "startId": 5293,
+    "startName": "Forest Whitaker",
+    "endId": 935,
+    "endName": "Jack Nicholson"
+  },
+  {
+    "date": "2026-10-28",
+    "startId": 10297,
+    "startName": "Jessica Chastain",
+    "endId": 30614,
+    "endName": "Ryan Gosling"
+  },
+  {
+    "date": "2026-10-29",
+    "startId": 8784,
+    "startName": "Daniel Craig",
+    "endId": 3223,
+    "endName": "Robert Downey Jr."
+  },
+  {
+    "date": "2026-10-30",
+    "startId": 16828,
+    "startName": "Chris Evans",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-10-31",
+    "startId": 23931,
+    "startName": "Amy Adams",
+    "endId": 1152,
+    "endName": "Christopher Columbus"
+  },
+  {
+    "date": "2026-11-01",
+    "startId": 206,
+    "startName": "Jim Carrey",
+    "endId": 6968,
+    "endName": "Harrison Ford"
+  },
+  {
+    "date": "2026-11-02",
+    "startId": 5081,
+    "startName": "Emily Blunt",
+    "endId": 6193,
+    "endName": "Leonardo DiCaprio"
+  },
+  {
+    "date": "2026-11-03",
+    "startId": 3895,
+    "startName": "Michael Caine",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-11-04",
+    "startId": 206,
+    "startName": "Jim Carrey",
+    "endId": 12891,
+    "endName": "Taika Waititi"
+  },
+  {
+    "date": "2026-11-05",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 1136406,
+    "endName": "Anya Taylor-Joy"
+  },
+  {
+    "date": "2026-11-06",
+    "startId": 85,
+    "startName": "Johnny Depp",
+    "endId": 1152,
+    "endName": "Christopher Columbus"
+  },
+  {
+    "date": "2026-11-07",
+    "startId": 11701,
+    "startName": "Angelina Jolie",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-11-08",
+    "startId": 4690,
+    "startName": "Rachel McAdams",
+    "endId": 23931,
+    "endName": "Amy Adams"
+  },
+  {
+    "date": "2026-11-09",
+    "startId": 488,
+    "startName": "Steven Spielberg",
+    "endId": 3,
+    "endName": "Harrison Ford"
+  },
+  {
+    "date": "2026-11-10",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 3896,
+    "endName": "Liam Neeson"
+  },
+  {
+    "date": "2026-11-11",
+    "startId": 82,
+    "startName": "Bruce Willis",
+    "endId": 1245,
+    "endName": "Scarlett Johansson"
+  },
+  {
+    "date": "2026-11-12",
+    "startId": 116,
+    "startName": "Gary Oldman",
+    "endId": 54693,
+    "endName": "Emma Stone"
+  },
+  {
+    "date": "2026-11-13",
+    "startId": 1100,
+    "startName": "Arnold Schwarzenegger",
+    "endId": 5657,
+    "endName": "Francis Ford Coppola"
+  },
+  {
+    "date": "2026-11-14",
+    "startId": 1100,
+    "startName": "Arnold Schwarzenegger",
+    "endId": 2888,
+    "endName": "Will Smith"
+  },
+  {
+    "date": "2026-11-15",
+    "startId": 1892,
+    "startName": "Matt Damon",
+    "endId": 192,
+    "endName": "Morgan Freeman"
+  },
+  {
+    "date": "2026-11-16",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 11664,
+    "endName": "Viola Davis"
+  },
+  {
+    "date": "2026-11-17",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 1625558,
+    "endName": "Pedro Pascal"
+  },
+  {
+    "date": "2026-11-18",
+    "startId": 3895,
+    "startName": "Michael Caine",
+    "endId": 2037,
+    "endName": "Cameron Diaz"
+  },
+  {
+    "date": "2026-11-19",
+    "startId": 500,
+    "startName": "Robert De Niro",
+    "endId": 71580,
+    "endName": "Tom Holland"
+  },
+  {
+    "date": "2026-11-20",
+    "startId": 524,
+    "startName": "Natalie Portman",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-11-21",
+    "startId": 28782,
+    "startName": "Gal Gadot",
+    "endId": 500,
+    "endName": "Robert De Niro"
+  },
+  {
+    "date": "2026-11-22",
+    "startId": 10850,
+    "startName": "Guillermo del Toro",
+    "endId": 4690,
+    "endName": "Rachel McAdams"
+  },
+  {
+    "date": "2026-11-23",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 1813,
+    "endName": "Anne Hathaway"
+  },
+  {
+    "date": "2026-11-24",
+    "startId": 71580,
+    "startName": "Tom Holland",
+    "endId": 73968,
+    "endName": "Zendaya"
+  },
+  {
+    "date": "2026-11-25",
+    "startId": 1283,
+    "startName": "Helena Bonham Carter",
+    "endId": 3896,
+    "endName": "Liam Neeson"
+  },
+  {
+    "date": "2026-11-26",
+    "startId": 64,
+    "startName": "Gary Sinise",
+    "endId": 525,
+    "endName": "Christopher Nolan"
+  },
+  {
+    "date": "2026-11-27",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 10447,
+    "endName": "Kirsten Dunst"
+  },
+  {
+    "date": "2026-11-28",
+    "startId": 2887,
+    "startName": "Charlize Theron",
+    "endId": 9273,
+    "endName": "Benedict Cumberbatch"
+  },
+  {
+    "date": "2026-11-29",
+    "startId": 287,
+    "startName": "Brad Pitt",
+    "endId": 1100,
+    "endName": "Arnold Schwarzenegger"
+  },
+  {
+    "date": "2026-11-30",
+    "startId": 10297,
+    "startName": "Jessica Chastain",
+    "endId": 1223,
+    "endName": "Clint Eastwood"
+  },
+  {
+    "date": "2026-12-01",
+    "startId": 7467,
+    "startName": "David Fincher",
+    "endId": 41292,
+    "endName": "Saoirse Ronan"
+  },
+  {
+    "date": "2026-12-02",
+    "startId": 3223,
+    "startName": "Robert Downey Jr.",
+    "endId": 74242,
+    "endName": "Rami Malek"
+  },
+  {
+    "date": "2026-12-03",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-12-04",
+    "startId": 16483,
+    "startName": "Joaquin Phoenix",
+    "endId": 3895,
+    "endName": "Michael Caine"
+  },
+  {
+    "date": "2026-12-05",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 2636,
+    "endName": "Paul Thomas Anderson"
+  },
+  {
+    "date": "2026-12-06",
+    "startId": 85,
+    "startName": "Johnny Depp",
+    "endId": 2294,
+    "endName": "Bong Joon-ho"
+  },
+  {
+    "date": "2026-12-07",
+    "startId": 8691,
+    "startName": "Cillian Murphy",
+    "endId": 9260,
+    "endName": "Ethan Hawke"
+  },
+  {
+    "date": "2026-12-08",
+    "startId": 206,
+    "startName": "Jim Carrey",
+    "endId": 3111,
+    "endName": "Sam Mendes"
+  },
+  {
+    "date": "2026-12-09",
+    "startId": 28782,
+    "startName": "Gal Gadot",
+    "endId": 16483,
+    "endName": "Joaquin Phoenix"
+  },
+  {
+    "date": "2026-12-10",
+    "startId": 287,
+    "startName": "Brad Pitt",
+    "endId": 18277,
+    "endName": "Sandra Bullock"
+  },
+  {
+    "date": "2026-12-11",
+    "startId": 2227,
+    "startName": "Nicole Kidman",
+    "endId": 2636,
+    "endName": "Paul Thomas Anderson"
+  },
+  {
+    "date": "2026-12-12",
+    "startId": 2710,
+    "startName": "James Cameron",
+    "endId": 22226,
+    "endName": "Ralph Fiennes"
+  },
+  {
+    "date": "2026-12-13",
+    "startId": 72129,
+    "startName": "Jennifer Lawrence",
+    "endId": 541,
+    "endName": "David Lynch"
+  },
+  {
+    "date": "2026-12-14",
+    "startId": 3063,
+    "startName": "Al Pacino",
+    "endId": 117642,
+    "endName": "Brie Larson"
+  },
+  {
+    "date": "2026-12-15",
+    "startId": 74242,
+    "startName": "Rami Malek",
+    "endId": 5656,
+    "endName": "George Lucas"
+  },
+  {
+    "date": "2026-12-16",
+    "startId": 2227,
+    "startName": "Nicole Kidman",
+    "endId": 287,
+    "endName": "Brad Pitt"
+  },
+  {
+    "date": "2026-12-17",
+    "startId": 541,
+    "startName": "David Lynch",
+    "endId": 2178,
+    "endName": "Ron Howard"
+  },
+  {
+    "date": "2026-12-18",
+    "startId": 31,
+    "startName": "Tom Hanks",
+    "endId": 6968,
+    "endName": "Harrison Ford"
+  },
+  {
+    "date": "2026-12-19",
+    "startId": 1892,
+    "startName": "Matt Damon",
+    "endId": 11856,
+    "endName": "Paul Rudd"
+  },
+  {
+    "date": "2026-12-20",
+    "startId": 2231,
+    "startName": "Samuel L. Jackson",
+    "endId": 887,
+    "endName": "J.J. Abrams"
+  },
+  {
+    "date": "2026-12-21",
+    "startId": 488,
+    "startName": "Steven Spielberg",
+    "endId": 578,
+    "endName": "Ridley Scott"
+  },
+  {
+    "date": "2026-12-22",
+    "startId": 117642,
+    "startName": "Brie Larson",
+    "endId": 23931,
+    "endName": "Amy Adams"
+  },
+  {
+    "date": "2026-12-23",
+    "startId": 54693,
+    "startName": "Emma Stone",
+    "endId": 1283,
+    "endName": "Helena Bonham Carter"
+  },
+  {
+    "date": "2026-12-24",
+    "startId": 239019,
+    "startName": "Timothée Chalamet",
+    "endId": 5081,
+    "endName": "Emily Blunt"
+  },
+  {
+    "date": "2026-12-25",
+    "startId": 22226,
+    "startName": "Ralph Fiennes",
+    "endId": 934,
+    "endName": "Russell Crowe"
+  },
+  {
+    "date": "2026-12-26",
+    "startId": 9349,
+    "startName": "Javier Bardem",
+    "endId": 1223,
+    "endName": "Clint Eastwood"
+  },
+  {
+    "date": "2026-12-27",
+    "startId": 8787,
+    "startName": "Mahershala Ali",
+    "endId": 13805,
+    "endName": "Zack Snyder"
+  },
+  {
+    "date": "2026-12-28",
+    "startId": 18918,
+    "startName": "Dwayne Johnson",
+    "endId": 5657,
+    "endName": "Francis Ford Coppola"
+  },
+  {
+    "date": "2026-12-29",
+    "startId": 137427,
+    "startName": "Denis Villeneuve",
+    "endId": 11856,
+    "endName": "Paul Rudd"
+  },
+  {
+    "date": "2026-12-30",
+    "startId": 2636,
+    "startName": "Paul Thomas Anderson",
+    "endId": 3896,
+    "endName": "Liam Neeson"
+  },
+  {
+    "date": "2026-12-31",
+    "startId": 2524,
+    "startName": "Tom Cruise",
+    "endId": 14343,
+    "endName": "Millie Bobby Brown"
+  }
+]
