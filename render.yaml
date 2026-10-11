@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cinelink-server
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run start:server
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: TMDB_API_KEY
+        sync: false

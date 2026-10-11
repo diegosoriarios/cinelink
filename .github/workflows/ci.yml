@@ -30,3 +30,6 @@ jobs:
 
       - name: Test
         run: npm test -- --ci
+
+      - name: Test server
+        run: npm run test:server

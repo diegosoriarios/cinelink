@@ -15,7 +15,7 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - Stats and streak tracking persisted in AsyncStorage
 - Shareable emoji result strings
 - Web export + Vercel deployment config
-- Cloudflare Worker proxy option for API key protection
+- Node server (`server/`) for TMDB proxy + realtime race rooms (Render deployment)
 
 ## Project Structure
 
@@ -31,7 +31,7 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - `src/data/puzzles.json` — 365 daily puzzles for 2026
 - `src/data/tmdbPool.json` — curated person pool (actors/directors)
 - `src/data/tmdbPoolIds.json` — ID-only pool list
-- `worker/tmdb-proxy.js` — Cloudflare Worker proxy
+- `server/` — Node server: TMDB proxy + race rooms (Express + ws)
 - `scripts/verify-data.mjs` — puzzle + pool integrity checks
 
 ## Gameplay Modes
@@ -240,25 +240,39 @@ Output goes to:
 
 - `dist/`
 
-## Cloudflare Worker Proxy
+## CineLink Server (TMDB proxy + races)
 
-File:
+Directory:
 
-- `worker/tmdb-proxy.js`
+- `server/` — Express + `ws` (TypeScript, run with tsx)
 
 Behavior:
 
-- Proxies `/tmdb/*` to `https://api.themoviedb.org/3/*`
-- Injects `TMDB_API_KEY` from Worker secret
-- Adds permissive CORS headers
+- `GET /healthz` — health check (used by Render)
+- `GET /tmdb/*` — proxies to `https://api.themoviedb.org/3/*`
+- Injects `TMDB_API_KEY` from env
+- Path allowlist + per-IP room-creation rate limit
+- `/race/*` — room REST + WebSocket (see `docs/plans/race-server.md`)
 
-Expected Worker secret:
+Expected server secret:
 
 - `TMDB_API_KEY`
 
+Local development:
+
+```
+npm run dev:server   # http://localhost:8787
+npm run test:server  # vitest suite
+```
+
+Production (Render):
+
+- The repo includes a `render.yaml` blueprint — create a Blueprint instance in the
+  Render dashboard and set `TMDB_API_KEY` when prompted.
+
 Then configure client app env:
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-worker-domain>`
+- `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-server-domain>`
 
 ## Development
 
