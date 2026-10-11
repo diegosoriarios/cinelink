@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,28 +10,38 @@ import {
   Share,
   StyleSheet,
   Text,
-  TextInput,
   View
 } from 'react-native';
-import { getImageUrl, getPersonDetails, searchPerson } from '../api/tmdb';
+import {
+  getImageUrl,
+  getMovieCredits,
+  getPersonCredits,
+  getPersonDetails,
+  type MovieCreditsResponse,
+  type PersonCreditsResponse
+} from '../api/tmdb';
 import { useGameState } from '../game/gameState';
-import type { GameMode, PersonLite } from '../types/game';
+import { HINT_COUNT, pickHintMovies, type HintMovie } from '../game/hints';
+import { useIsWideScreen } from '../hooks/useIsWideScreen';
+import type { GameMode, MovieLite, PersonLite } from '../types/game';
 
 type Props = {
   mode: GameMode;
 };
 
 const Confetti = () => {
-  const progress = useRef(new Animated.Value(0)).current;
+  const [progress] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.timing(progress, {
         toValue: 1,
         duration: 1600,
         useNativeDriver: true
       })
-    ).start();
+    );
+    loop.start();
+    return () => loop.stop();
   }, [progress]);
 
   const pieces = new Array(18).fill(0).map((_, idx) => {
@@ -68,12 +78,51 @@ const Confetti = () => {
   return <View pointerEvents="none" style={styles.confettiContainer}>{pieces}</View>;
 };
 
+const releaseTime = (movie: MovieLite) => (movie.release_date ? Date.parse(movie.release_date) : 0);
+
+const byReleaseDesc = (a: MovieLite, b: MovieLite) => releaseTime(b) - releaseTime(a);
+
+const normalizeMovies = (credits: PersonCreditsResponse): MovieLite[] => {
+  const seen = new Set<number>();
+  const movies: MovieLite[] = [];
+  const push = (movie: { id: number; title: string; release_date?: string; poster_path?: string | null }) => {
+    if (!movie?.id || !movie.title || seen.has(movie.id)) {
+      return;
+    }
+    seen.add(movie.id);
+    movies.push({ id: movie.id, title: movie.title, release_date: movie.release_date, poster_path: movie.poster_path ?? null });
+  };
+  credits.cast.forEach(push);
+  credits.crew.forEach(push);
+  return movies.sort(byReleaseDesc);
+};
+
+const normalizeDirectors = (credits: MovieCreditsResponse): PersonLite[] => {
+  const seen = new Set<number>();
+  const directors: PersonLite[] = [];
+  for (const member of credits.crew) {
+    if (member.department !== 'Directing' || member.job !== 'Director' || seen.has(member.id)) {
+      continue;
+    }
+    seen.add(member.id);
+    directors.push({ id: member.id, name: member.name, profile_path: member.profile_path });
+  }
+  return directors;
+};
+
+const normalizeCast = (credits: MovieCreditsResponse): PersonLite[] =>
+  credits.cast.map((member) => ({ id: member.id, name: member.name, profile_path: member.profile_path }));
+
+const CAST_PREVIEW_COUNT = 15;
+
 export const GameScreen = ({ mode }: Props) => {
   const {
     initMode,
     addHop,
+    undoHop,
     tickSpeedRun,
     shareResult,
+    resetCurrentMode,
     startPerson,
     targetPerson,
     hops,
@@ -82,19 +131,47 @@ export const GameScreen = ({ mode }: Props) => {
     hasWon,
     hasLost,
     speedRunSeconds,
+    explorerWins,
     initialized,
     puzzle
   } = useGameState();
+  const isWide = useIsWideScreen();
 
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<PersonLite[]>([]);
-  const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [personMap, setPersonMap] = useState<Record<number, PersonLite>>({});
+  const [initError, setInitError] = useState<{ mode: GameMode; message: string } | null>(null);
+  const [personCredits, setPersonCredits] = useState<{ personId: number; movies: MovieLite[]; error: boolean } | null>(null);
+  const [creditsToken, setCreditsToken] = useState(0);
+  const [picked, setPicked] = useState<{ personId: number; movie: MovieLite } | null>(null);
+  const [movieCredits, setMovieCredits] = useState<{ movieId: number; directors: PersonLite[]; cast: PersonLite[]; error: boolean } | null>(null);
+  const [showFullCast, setShowFullCast] = useState(false);
+  const [targetHints, setTargetHints] = useState<{ personId: number; movies: HintMovie[] } | null>(null);
+  const [hintsShown, setHintsShown] = useState(0);
+
+  const currentPersonId = path[path.length - 1];
+  const gameActive = !hasWon && !hasLost;
+  const activeCredits = personCredits && personCredits.personId === currentPersonId ? personCredits : null;
+  const moviesLoading = gameActive && !activeCredits;
+  const moviesError = activeCredits?.error === true;
+  const movies = activeCredits && !activeCredits.error ? activeCredits.movies : null;
+  const activePick = picked && picked.personId === currentPersonId ? picked : null;
+  const activeMovieCredits = activePick && movieCredits && movieCredits.movieId === activePick.movie.id ? movieCredits : null;
+  const creditsLoading = Boolean(activePick) && !activeMovieCredits;
+  const visibleCast = activeMovieCredits && !activeMovieCredits.error ? (showFullCast ? activeMovieCredits.cast : activeMovieCredits.cast.slice(0, CAST_PREVIEW_COUNT)) : [];
+  const activeHints = targetHints && targetPerson && targetHints.personId === targetPerson.id ? targetHints.movies : null;
+  const revealedCount = hasWon || hasLost ? HINT_COUNT : hintsShown;
+  const revealedHints = activeHints ? activeHints.slice(0, revealedCount) : [];
+  const hintButtonVisible = gameActive && !!activeHints && hintsShown < activeHints.length;
+
+  const startMode = useCallback(() => {
+    initMode(mode).catch(() => {
+      setInitError({ mode, message: 'Could not load the game. Check your connection and try again.' });
+    });
+  }, [initMode, mode]);
 
   useEffect(() => {
-    initMode(mode);
-  }, [initMode, mode]);
+    startMode();
+  }, [startMode]);
 
   useEffect(() => {
     if (mode !== 'speedrun') {
@@ -134,24 +211,95 @@ export const GameScreen = ({ mode }: Props) => {
   }, [path, personMap]);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
+    if (!gameActive || !currentPersonId) {
       return;
     }
-    const handle = setTimeout(async () => {
-      setSearching(true);
+    let cancelled = false;
+    const run = async () => {
       try {
-        const data = await searchPerson(query);
-        setResults(data.slice(0, 8));
-      } finally {
-        setSearching(false);
+        const credits = await getPersonCredits(currentPersonId);
+        if (cancelled) {
+          return;
+        }
+        setPersonCredits({ personId: currentPersonId, movies: normalizeMovies(credits), error: false });
+      } catch {
+        if (!cancelled) {
+          setPersonCredits({ personId: currentPersonId, movies: [], error: true });
+        }
       }
-    }, 250);
-    return () => clearTimeout(handle);
-  }, [query]);
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPersonId, gameActive, creditsToken]);
+
+  useEffect(() => {
+    if (!activePick || !gameActive) {
+      return;
+    }
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const credits = await getMovieCredits(activePick.movie.id);
+        if (cancelled) {
+          return;
+        }
+        setMovieCredits({
+          movieId: activePick.movie.id,
+          directors: normalizeDirectors(credits),
+          cast: normalizeCast(credits),
+          error: false
+        });
+      } catch {
+        if (!cancelled) {
+          setMovieCredits({ movieId: activePick.movie.id, directors: [], cast: [], error: true });
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [activePick, gameActive]);
+
+  useEffect(() => {
+    const targetId = targetPerson?.id;
+    if (!targetId) {
+      return;
+    }
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const credits = await getPersonCredits(targetId);
+        if (cancelled) {
+          return;
+        }
+        setTargetHints({ personId: targetId, movies: pickHintMovies(credits) });
+        setHintsShown(0);
+      } catch {
+        if (!cancelled) {
+          setTargetHints(null);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [targetPerson?.id]);
+
+  const onMovieSelect = (movie: MovieLite) => {
+    setShowFullCast(false);
+    setMovieCredits(null);
+    setPicked({ personId: currentPersonId, movie });
+  };
 
   const onSelectPerson = async (person: PersonLite) => {
-    const result = await addHop(person.id);
+    if (!activePick) {
+      return;
+    }
+    const result = await addHop(person.id, { id: activePick.movie.id, title: activePick.movie.title });
     if (!result.ok) {
       setMessage(result.reason ?? 'Invalid hop');
       return;
@@ -160,9 +308,33 @@ export const GameScreen = ({ mode }: Props) => {
       ...current,
       [person.id]: person
     }));
-    setQuery('');
-    setResults([]);
-    setMessage(`Connected via ${result.hop?.sharedMovieTitle}`);
+    setPicked(null);
+    setMovieCredits(null);
+    setMessage(null);
+  };
+
+  const onUndo = () => {
+    if (undoHop()) {
+      setPicked(null);
+      setMovieCredits(null);
+      setMessage(null);
+    }
+  };
+
+  const onNextRound = () => {
+    setPicked(null);
+    setMovieCredits(null);
+    setPersonCredits(null);
+    setShowFullCast(false);
+    setMessage(null);
+    resetCurrentMode().catch(() => {
+      setInitError({ mode, message: 'Could not load the next round. Check your connection and try again.' });
+    });
+  };
+
+  const onBackToMovies = () => {
+    setPicked(null);
+    setMovieCredits(null);
   };
 
   const onShare = async () => {
@@ -187,10 +359,204 @@ export const GameScreen = ({ mode }: Props) => {
     return `${min}:${sec}`;
   }, [speedRunSeconds]);
 
+  if (initError && initError.mode === mode) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorTitle}>Something went wrong</Text>
+        <Text style={styles.errorText}>{initError.message}</Text>
+        <Pressable style={styles.button} onPress={startMode}>
+          <Text style={styles.buttonText}>Retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (mode === 'daily' && initialized && !puzzle) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorTitle}>No puzzle available today</Text>
+        <Text style={styles.errorText}>Please check back later.</Text>
+      </View>
+    );
+  }
+
   if (!initialized || !startPerson || !targetPerson) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e2e8f0" />
+      </View>
+    );
+  }
+
+  const hud = (
+    <View style={styles.hud}>
+      {mode === 'daily' ? <Text style={styles.hudText}>Hops: {hops.length}/{maxHops}</Text> : null}
+      {mode === 'speedrun' ? <Text style={styles.hudText}>Time: {timeLabel}</Text> : null}
+      {mode === 'explorer' ? <Text style={styles.hudText}>Rounds won: {explorerWins}</Text> : null}
+      {gameActive && hops.length > 0 ? (
+        <Pressable onPress={onUndo} hitSlop={8}>
+          <Text style={styles.undoText}>↩ Undo</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+
+  const hintBox =
+    activeHints && (revealedHints.length > 0 || hintButtonVisible) ? (
+      <View style={styles.hintBox}>
+        <Text style={styles.hintTitle}>Need a hint? Movies the target is known for:</Text>
+        {revealedHints.map((movie, idx) => (
+          <Text key={`hint-${movie.id}`} style={styles.hintText}>💡 Hint {idx + 1}: {movie.title}</Text>
+        ))}
+        {hintButtonVisible ? (
+          <Pressable style={styles.hintButton} onPress={() => setHintsShown((count) => Math.min(activeHints.length, count + 1))}>
+            <Text style={styles.hintButtonText}>💡 Reveal hint ({hintsShown}/{HINT_COUNT})</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    ) : null;
+
+  const browser = gameActive ? (
+    <ScrollView style={styles.browser}>
+      {activePick ? (
+        <View>
+          <View style={styles.browserHeader}>
+            <View style={styles.browserHeading}>
+              <Text style={styles.browserTitle} numberOfLines={1}>{activePick.movie.title}</Text>
+              <Text style={styles.browserSubtitle}>Select a person to continue the chain</Text>
+            </View>
+            <Pressable style={styles.linkButton} onPress={onBackToMovies}>
+              <Text style={styles.linkButtonText}>← Movies</Text>
+            </Pressable>
+          </View>
+          {creditsLoading ? <ActivityIndicator color="#cbd5e1" style={styles.loader} /> : null}
+          {activeMovieCredits?.error ? <Text style={styles.errorMessage}>Could not load this movie's credits.</Text> : null}
+          {activeMovieCredits && !activeMovieCredits.error ? (
+            <View>
+              {activeMovieCredits.directors.length > 0 ? <Text style={styles.groupTitle}>Directors</Text> : null}
+              {activeMovieCredits.directors.map((person) => (
+                <PersonRow
+                  key={`director-${person.id}`}
+                  person={person}
+                  isTarget={targetPerson?.id === person.id}
+                  onPress={onSelectPerson}
+                />
+              ))}
+              {activeMovieCredits.cast.length > 0 ? <Text style={styles.groupTitle}>Cast</Text> : null}
+              {visibleCast.map((person) => (
+                <PersonRow
+                  key={`cast-${person.id}`}
+                  person={person}
+                  isTarget={targetPerson?.id === person.id}
+                  onPress={onSelectPerson}
+                />
+              ))}
+              {activeMovieCredits.cast.length > CAST_PREVIEW_COUNT ? (
+                <Pressable style={styles.linkButton} onPress={() => setShowFullCast((value) => !value)}>
+                  <Text style={styles.linkButtonText}>
+                    {showFullCast ? 'Show less' : `Show all cast (${activeMovieCredits.cast.length})`}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.browserTitle}>{personMap[currentPersonId]?.name ?? startPerson.name}</Text>
+          <Text style={styles.browserSubtitle}>Select a movie to see its cast and directors</Text>
+          {moviesLoading ? <ActivityIndicator color="#cbd5e1" style={styles.loader} /> : null}
+          {moviesError ? (
+            <View>
+              <Text style={styles.errorMessage}>Could not load this person's movies.</Text>
+              <Pressable style={styles.linkButton} onPress={() => setCreditsToken((token) => token + 1)}>
+                <Text style={styles.linkButtonText}>Retry</Text>
+              </Pressable>
+            </View>
+          ) : null}
+          {movies && movies.length === 0 ? (
+            <Text style={styles.errorMessage}>No movies found. Use Undo to go back.</Text>
+          ) : null}
+          {movies ? movies.map((movie) => <MovieRow key={movie.id} movie={movie} onPress={() => onMovieSelect(movie)} />) : null}
+        </View>
+      )}
+    </ScrollView>
+  ) : null;
+
+  const winCard = hasWon ? (
+    <View style={styles.endCard}>
+      <Text style={styles.endTitle}>You won</Text>
+      <Text style={styles.endText}>Completed in {hops.length} hops</Text>
+      {mode === 'speedrun' ? <Text style={styles.endText}>Time: {timeLabel}</Text> : null}
+      <View style={styles.endActions}>
+        <Pressable style={styles.button} onPress={onShare}><Text style={styles.buttonText}>Share</Text></Pressable>
+        {mode === 'explorer' ? (
+          <Pressable style={[styles.button, styles.buttonNext]} onPress={onNextRound}>
+            <Text style={styles.buttonText}>Next round →</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  ) : null;
+
+  const lossCard =
+    hasLost && mode === 'daily' ? (
+      <View style={styles.endCard}>
+        <Text style={styles.endTitle}>Daily failed</Text>
+        <Text style={styles.endText}>You used all {maxHops} hops.</Text>
+        <Text style={styles.endText}>
+          Shortest known path: {puzzle?.shortestPath?.join(' → ') ?? 'Not available'}
+        </Text>
+        <Pressable style={styles.button} onPress={onShare}><Text style={styles.buttonText}>Share</Text></Pressable>
+      </View>
+    ) : null;
+
+  if (isWide) {
+    return (
+      <View style={[styles.root, styles.rootWide]}>
+        {hasWon ? <Confetti /> : null}
+        <View style={styles.desktopColumns}>
+          <View style={styles.rail}>
+            <View style={styles.railCards}>
+              <PersonCard label="Start" name={startPerson.name} profilePath={startPerson.profile_path} />
+              <PersonCard label="Target" name={targetPerson.name} profilePath={targetPerson.profile_path} />
+            </View>
+            {hud}
+            {hintBox}
+            <Text style={styles.sectionTitle}>Current Path</Text>
+            <View style={styles.timeline}>
+              <View style={styles.timelineNode}>
+                <Text style={styles.timelineNodeText}>{startPerson.name}</Text>
+              </View>
+              {hops.map((hop, idx) => (
+                <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}-${idx}`}>
+                  <View style={styles.timelineEdge}>
+                    <Text style={styles.timelineEdgeText}>{hop.sharedMovieTitle}</Text>
+                  </View>
+                  <View style={styles.timelineNode}>
+                    <Text style={styles.timelineNodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text>
+                  </View>
+                </React.Fragment>
+              ))}
+              {!hasWon ? (
+                <React.Fragment>
+                  <View style={[styles.timelineEdge, styles.timelineEdgePending]}>
+                    <Text style={styles.timelineEdgeText}>?</Text>
+                  </View>
+                  <View style={[styles.timelineNode, styles.timelineNodeTarget]}>
+                    <Text style={[styles.timelineNodeText, styles.timelineNodeTargetText]}>{targetPerson.name}</Text>
+                  </View>
+                </React.Fragment>
+              ) : null}
+            </View>
+            {winCard}
+            {lossCard}
+          </View>
+          <View style={styles.browserPane}>
+            {message ? <Text style={styles.message}>{message}</Text> : null}
+            {browser}
+          </View>
+        </View>
       </View>
     );
   }
@@ -205,10 +571,8 @@ export const GameScreen = ({ mode }: Props) => {
         <PersonCard label="Target" name={targetPerson.name} profilePath={targetPerson.profile_path} />
       </View>
 
-      <View style={styles.hud}>
-        {mode === 'daily' ? <Text style={styles.hudText}>Hops: {hops.length}/{maxHops}</Text> : null}
-        {mode === 'speedrun' ? <Text style={styles.hudText}>Time: {timeLabel}</Text> : null}
-      </View>
+      {hud}
+      {hintBox}
 
       <Text style={styles.sectionTitle}>Current Path</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pathContainer}>
@@ -221,51 +585,11 @@ export const GameScreen = ({ mode }: Props) => {
         ))}
       </ScrollView>
 
-      {!hasWon && !hasLost ? (
-        <View style={styles.searchWrap}>
-          <TextInput
-            placeholder="Search actor or director"
-            placeholderTextColor="#64748b"
-            style={styles.input}
-            value={query}
-            onChangeText={setQuery}
-            autoCapitalize="words"
-          />
-          {searching ? <ActivityIndicator style={styles.searchLoader} color="#cbd5e1" /> : null}
-          {results.length > 0 ? (
-            <View style={styles.dropdown}>
-              {results.map((person) => (
-                <Pressable key={person.id} style={styles.resultRow} onPress={() => onSelectPerson(person)}>
-                  <Avatar path={person.profile_path} size={30} />
-                  <Text style={styles.resultName}>{person.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-          ) : null}
-        </View>
-      ) : null}
-
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
-      {hasWon ? (
-        <View style={styles.endCard}>
-          <Text style={styles.endTitle}>You won</Text>
-          <Text style={styles.endText}>Completed in {hops.length} hops</Text>
-          {mode === 'speedrun' ? <Text style={styles.endText}>Time: {timeLabel}</Text> : null}
-          <Pressable style={styles.button} onPress={onShare}><Text style={styles.buttonText}>Share</Text></Pressable>
-        </View>
-      ) : null}
-
-      {hasLost && mode === 'daily' ? (
-        <View style={styles.endCard}>
-          <Text style={styles.endTitle}>Daily failed</Text>
-          <Text style={styles.endText}>You used all {maxHops} hops.</Text>
-          <Text style={styles.endText}>
-            Shortest known path: {puzzle?.shortestPath?.join(' → ') ?? 'Not available'}
-          </Text>
-          <Pressable style={styles.button} onPress={onShare}><Text style={styles.buttonText}>Share</Text></Pressable>
-        </View>
-      ) : null}
+      {browser}
+      {winCard}
+      {lossCard}
     </View>
   );
 };
@@ -289,9 +613,76 @@ const PersonCard = ({ label, name, profilePath }: { label: string; name: string;
   );
 };
 
+const PersonRow = ({ person, isTarget, onPress }: { person: PersonLite; isTarget: boolean; onPress: (person: PersonLite) => void }) => {
+  return (
+    <Pressable style={[styles.personRow, isTarget ? styles.personRowTarget : null]} onPress={() => onPress(person)}>
+      <Avatar path={person.profile_path} size={36} />
+      <Text style={styles.personRowName} numberOfLines={1}>{person.name}</Text>
+      {isTarget ? (
+        <View style={styles.targetBadge}>
+          <Text style={styles.targetBadgeText}>TARGET</Text>
+        </View>
+      ) : null}
+    </Pressable>
+  );
+};
+
+const Poster = ({ path, width }: { path: string | null; width: number }) => {
+  const uri = getImageUrl(path);
+  const height = Math.round(width * 1.5);
+  return uri ? (
+    <Image source={{ uri }} style={{ width, height, borderRadius: 6, backgroundColor: '#1e293b' }} />
+  ) : (
+    <View style={{ width, height, borderRadius: 6, backgroundColor: '#334155' }} />
+  );
+};
+
+const MovieRow = ({ movie, onPress }: { movie: MovieLite; onPress: () => void }) => {
+  return (
+    <Pressable style={styles.movieRow} onPress={onPress}>
+      <Poster path={movie.poster_path ?? null} width={40} />
+      <View style={styles.movieRowText}>
+        <Text style={styles.movieRowTitle} numberOfLines={1}>{movie.title}</Text>
+        {movie.release_date ? <Text style={styles.movieRowYear}>{movie.release_date.slice(0, 4)}</Text> : null}
+      </View>
+    </Pressable>
+  );
+};
+
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#020617', padding: 16 },
+  root: { flex: 1, backgroundColor: '#020617', padding: 16, maxWidth: 720, width: '100%', alignSelf: 'center' },
+  rootWide: { maxWidth: 1080 },
+  desktopColumns: { flex: 1, flexDirection: 'row', gap: 20 },
+  rail: { width: 340, flexShrink: 0 },
+  railCards: { gap: 10 },
+  browserPane: { flex: 1 },
+  timeline: { gap: 6, paddingBottom: 8 },
+  timelineNode: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#1d4ed8',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignSelf: 'flex-start'
+  },
+  timelineNodeText: { color: '#f8fafc', fontSize: 12, fontWeight: '600' },
+  timelineNodeTarget: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#22d3ee', borderStyle: 'dashed' },
+  timelineNodeTargetText: { color: '#22d3ee' },
+  timelineEdge: {
+    marginLeft: 18,
+    backgroundColor: '#334155',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignSelf: 'flex-start'
+  },
+  timelineEdgeText: { color: '#e2e8f0', fontSize: 12 },
+  timelineEdgePending: { backgroundColor: 'transparent', borderWidth: 1, borderColor: '#475569', borderStyle: 'dashed' },
   centered: { flex: 1, backgroundColor: '#020617', alignItems: 'center', justifyContent: 'center' },
+  errorTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
+  errorText: { color: '#cbd5e1', fontSize: 14, marginBottom: 12, textAlign: 'center' },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   personCard: {
     flex: 1,
@@ -308,34 +699,69 @@ const styles = StyleSheet.create({
   arrow: { color: '#cbd5e1', fontSize: 20, marginHorizontal: 8 },
   hud: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
   hudText: { color: '#cbd5e1', fontSize: 14 },
+  undoText: { color: '#93c5fd', fontWeight: '600' },
+  hintBox: { marginTop: 10, backgroundColor: '#0f172a', borderColor: '#1e293b', borderWidth: 1, borderRadius: 10, padding: 10, gap: 4 },
+  hintTitle: { color: '#94a3b8', fontSize: 12, fontWeight: '600' },
+  hintText: { color: '#fbbf24', fontSize: 13 },
+  hintButton: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    backgroundColor: '#1e293b',
+    borderColor: '#fbbf24',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6
+  },
+  hintButtonText: { color: '#fbbf24', fontWeight: '700', fontSize: 13 },
   sectionTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700', marginTop: 18, marginBottom: 10 },
   pathContainer: { alignItems: 'center', paddingBottom: 8 },
   node: { backgroundColor: '#1d4ed8', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, marginRight: 8 },
   nodeText: { color: '#f8fafc', fontSize: 12, fontWeight: '600' },
   edge: { backgroundColor: '#334155', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, marginRight: 8 },
   edgeText: { color: '#e2e8f0', fontSize: 12 },
-  searchWrap: { marginTop: 18 },
-  input: {
-    backgroundColor: '#0f172a',
-    color: '#e2e8f0',
-    borderColor: '#334155',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 12
-  },
-  searchLoader: { marginTop: 8 },
-  dropdown: {
-    marginTop: 8,
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 10,
-    overflow: 'hidden'
-  },
-  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 10, paddingVertical: 10 },
-  resultName: { color: '#e2e8f0', fontSize: 14 },
   message: { marginTop: 12, color: '#93c5fd' },
+  browser: { flex: 1, marginTop: 12 },
+  browserHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
+  browserHeading: { flexShrink: 1 },
+  browserTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700' },
+  browserSubtitle: { color: '#94a3b8', fontSize: 12, marginTop: 2, marginBottom: 10 },
+  groupTitle: { color: '#cbd5e1', fontSize: 13, fontWeight: '700', marginTop: 12, marginBottom: 6 },
+  movieRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#0f172a',
+    borderColor: '#1e293b',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8
+  },
+  movieRowText: { flexShrink: 1 },
+  movieRowTitle: { color: '#e2e8f0', fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  movieRowYear: { color: '#94a3b8', fontSize: 12, marginTop: 1 },
+  personRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#0f172a',
+    borderColor: '#1e293b',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8
+  },
+  personRowTarget: { borderColor: '#22d3ee', borderWidth: 2 },
+  personRowName: { color: '#e2e8f0', fontSize: 14, flexShrink: 1 },
+  targetBadge: { backgroundColor: '#22d3ee', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  targetBadgeText: { color: '#020617', fontSize: 10, fontWeight: '800' },
+  linkButton: { alignSelf: 'flex-start', paddingVertical: 8, marginBottom: 8 },
+  linkButtonText: { color: '#93c5fd', fontWeight: '600' },
+  loader: { marginTop: 12 },
+  errorMessage: { color: '#f43f5e', marginTop: 8 },
   endCard: {
     marginTop: 18,
     borderWidth: 1,
@@ -356,6 +782,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8
   },
   buttonText: { color: '#f8fafc', fontWeight: '700' },
+  endActions: { flexDirection: 'row', gap: 10, marginTop: 6 },
+  buttonNext: { backgroundColor: '#16a34a' },
   confettiContainer: {
     position: 'absolute',
     top: 0,

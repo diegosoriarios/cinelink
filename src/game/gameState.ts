@@ -3,13 +3,17 @@ import { create } from 'zustand';
 import puzzles from '../data/puzzles.json';
 import pool from '../data/tmdbPool.json';
 import { getPersonDetails } from '../api/tmdb';
-import { getSharedMovies } from './validator';
 import type { GameMode, Hop, PersonId, PuzzleEntry, PuzzleHistoryEntry } from '../types/game';
 
 type PersonPreview = {
   id: number;
   name: string;
   profile_path: string | null;
+};
+
+type ChosenMovie = {
+  id: number;
+  title: string;
 };
 
 type GameStore = {
@@ -27,10 +31,12 @@ type GameStore = {
   speedRunStartedAt: number | null;
   streak: number;
   bestStreak: number;
+  explorerWins: number;
   history: PuzzleHistoryEntry[];
   initialized: boolean;
   initMode: (mode: GameMode) => Promise<void>;
-  addHop: (nextPersonId: PersonId) => Promise<{ ok: boolean; reason?: string; hop?: Hop }>;
+  addHop: (nextPersonId: PersonId, movie: ChosenMovie) => Promise<{ ok: boolean; reason?: string; hop?: Hop }>;
+  undoHop: () => boolean;
   tickSpeedRun: () => void;
   completeGame: (win: boolean) => Promise<void>;
   resetCurrentMode: () => Promise<void>;
@@ -48,7 +54,7 @@ const getPuzzleByDate = (date: string) => {
 };
 
 const randomPair = () => {
-  const people = pool as Array<{ id: number; name: string }>;
+  const people = pool as { id: number; name: string }[];
   const first = people[Math.floor(Math.random() * people.length)];
   let second = people[Math.floor(Math.random() * people.length)];
   while (second.id === first.id) {
@@ -64,11 +70,21 @@ const loadStats = async () => {
     AsyncStorage.getItem(BEST_STREAK_KEY)
   ]);
 
-  const history = historyRaw ? (JSON.parse(historyRaw) as PuzzleHistoryEntry[]) : [];
+  let history: PuzzleHistoryEntry[] = [];
+  if (historyRaw) {
+    try {
+      const parsed = JSON.parse(historyRaw);
+      if (Array.isArray(parsed)) {
+        history = parsed as PuzzleHistoryEntry[];
+      }
+    } catch {
+      history = [];
+    }
+  }
   const streak = streakRaw ? Number(streakRaw) : 0;
   const bestStreak = bestRaw ? Number(bestRaw) : 0;
 
-  return { history, streak, bestStreak };
+  return { history, streak: Number.isFinite(streak) ? streak : 0, bestStreak: Number.isFinite(bestStreak) ? bestStreak : 0 };
 };
 
 const saveStats = async (history: PuzzleHistoryEntry[], streak: number, bestStreak: number) => {
@@ -103,6 +119,7 @@ export const useGameState = create<GameStore>((set, get) => ({
   speedRunStartedAt: null,
   streak: 0,
   bestStreak: 0,
+  explorerWins: 0,
   history: [],
   initialized: false,
 
@@ -157,7 +174,7 @@ export const useGameState = create<GameStore>((set, get) => ({
     });
   },
 
-  addHop: async (nextPersonId) => {
+  addHop: async (nextPersonId, movie) => {
     const state = get();
     if (state.hasWon || state.hasLost) {
       return { ok: false, reason: 'Game already finished' };
@@ -168,17 +185,11 @@ export const useGameState = create<GameStore>((set, get) => ({
       return { ok: false, reason: 'Cannot hop to the same person' };
     }
 
-    const sharedMovies = await getSharedMovies(previousPersonId, nextPersonId);
-    if (sharedMovies.length === 0) {
-      return { ok: false, reason: 'No shared movie credits found' };
-    }
-
-    const chosenMovie = sharedMovies[0];
     const hop: Hop = {
       fromPersonId: previousPersonId,
       toPersonId: nextPersonId,
-      sharedMovieId: chosenMovie.id,
-      sharedMovieTitle: chosenMovie.title
+      sharedMovieId: movie.id,
+      sharedMovieTitle: movie.title
     };
 
     const nextPath = [...state.path, nextPersonId];
@@ -202,6 +213,18 @@ export const useGameState = create<GameStore>((set, get) => ({
     return { ok: true, hop };
   },
 
+  undoHop: () => {
+    const state = get();
+    if (state.hasWon || state.hasLost || state.hops.length === 0) {
+      return false;
+    }
+    set({
+      path: state.path.slice(0, -1),
+      hops: state.hops.slice(0, -1)
+    });
+    return true;
+  },
+
   tickSpeedRun: () => {
     const { mode, speedRunStartedAt, hasWon, hasLost } = get();
     if (mode !== 'speedrun' || !speedRunStartedAt || hasWon || hasLost) {
@@ -213,6 +236,12 @@ export const useGameState = create<GameStore>((set, get) => ({
 
   completeGame: async (win) => {
     const state = get();
+    if (state.mode === 'explorer') {
+      if (win) {
+        set({ explorerWins: state.explorerWins + 1 });
+      }
+      return;
+    }
     if (state.mode !== 'daily') {
       return;
     }

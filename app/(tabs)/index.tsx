@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'expo-router';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import puzzles from '../../src/data/puzzles.json';
 import { useGameState } from '../../src/game/gameState';
 
@@ -9,51 +9,42 @@ const today = new Date().toISOString().slice(0, 10);
 export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
   const streak = useGameState((s) => s.streak);
-  const puzzle = useMemo(() => (puzzles as Array<{ date: string; startName: string; endName: string }>).find((p) => p.date === today), []);
+  const puzzle = useMemo(() => (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today), []);
 
   useEffect(() => {
     initMode('daily');
   }, [initMode]);
 
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.webContainer}>
-        <Text style={styles.webTitle}>CineLink Web is working</Text>
-        <Text style={styles.webSubtitle}>If you can see this, web rendering is successful.</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>CineLink</Text>
-      <Text style={styles.subtitle}>Connect stars through shared movie credits</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>CineLink</Text>
+        <Text style={styles.subtitle}>Connect stars through shared movie credits</Text>
 
-      <View style={styles.dailyCard}>
-        <Text style={styles.label}>Today’s Daily Puzzle</Text>
-        <Text style={styles.pair}>{puzzle?.startName ?? 'Start'} → {puzzle?.endName ?? 'Target'}</Text>
-        <Text style={styles.streak}>Current streak: {streak}</Text>
-        <Link href="/game/daily" asChild>
-          <Pressable style={styles.primaryButton}><Text style={styles.primaryText}>Play Daily</Text></Pressable>
+        <View style={styles.dailyCard}>
+          <Text style={styles.label}>Today’s Daily Puzzle</Text>
+          <Text style={styles.pair}>{puzzle?.startName ?? 'Start'} → {puzzle?.endName ?? 'Target'}</Text>
+          <Text style={styles.streak}>Current streak: {streak}</Text>
+          <Link href="/game/daily" asChild>
+            <Pressable style={styles.primaryButton}><Text style={styles.primaryText}>Play Daily</Text></Pressable>
+          </Link>
+        </View>
+
+        <Link href="/game/explorer" asChild>
+          <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Explorer Mode</Text></Pressable>
+        </Link>
+
+        <Link href="/game/speedrun" asChild>
+          <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Speed Run</Text></Pressable>
         </Link>
       </View>
-
-      <Link href="/game/explorer" asChild>
-        <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Explorer Mode</Text></Pressable>
-      </Link>
-
-      <Link href="/game/speedrun" asChild>
-        <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Speed Run</Text></Pressable>
-      </Link>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  webContainer: { flex: 1, backgroundColor: '#020617', padding: 20, justifyContent: 'center', alignItems: 'center' },
-  webTitle: { color: '#f8fafc', fontSize: 30, fontWeight: '800', marginBottom: 10 },
-  webSubtitle: { color: '#94a3b8', fontSize: 15 },
   container: { flex: 1, backgroundColor: '#020617', padding: 20, justifyContent: 'center' },
+  content: { width: '100%', maxWidth: 560, alignSelf: 'center' },
   title: { color: '#f8fafc', fontSize: 40, fontWeight: '800', marginBottom: 8 },
   subtitle: { color: '#94a3b8', fontSize: 15, marginBottom: 20 },
   dailyCard: {

@@ -21,30 +21,31 @@ type PersonResult = {
   known_for_department?: string;
 };
 
-type PersonCreditsResponse = {
+export type PersonCreditsResponse = {
   id: number;
-  cast: Array<{ id: number; title: string; release_date?: string; poster_path?: string | null }>;
-  crew: Array<{
+  cast: { id: number; title: string; release_date?: string; poster_path?: string | null; popularity?: number }[];
+  crew: {
     id: number;
     title: string;
     job: string;
     department: string;
     release_date?: string;
     poster_path?: string | null;
-  }>;
+    popularity?: number;
+  }[];
 };
 
-type MovieCreditsResponse = {
+export type MovieCreditsResponse = {
   id: number;
-  cast: Array<{ id: number; name: string; profile_path: string | null; known_for_department?: string }>;
-  crew: Array<{
+  cast: { id: number; name: string; profile_path: string | null; known_for_department?: string }[];
+  crew: {
     id: number;
     name: string;
     job: string;
     department: string;
     profile_path: string | null;
     known_for_department?: string;
-  }>;
+  }[];
 };
 
 type PersonDetailsResponse = {

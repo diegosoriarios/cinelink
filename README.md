@@ -222,9 +222,13 @@ Root stack in:
 
 ### Open Graph metadata
 
-- `public/index.html`
+- `app/+html.tsx`
   - `og:title`, `og:description`, `og:image`, `og:url`
   - Twitter card tags
+  - `og:url` uses `EXPO_PUBLIC_APP_URL` when set at build time (falls back to a placeholder)
+
+Note: do not create `public/index.html` — the dev server serves it verbatim at `/`,
+which shadows the app and results in a blank page.
 
 ### Web export
 
@@ -288,11 +292,26 @@ Lint:
 npm run lint
 ```
 
+Run tests (Jest + jest-expo):
+
+```bash
+npm test
+```
+
 Verify puzzle data:
 
 ```bash
 npm run verify:data
 ```
+
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs on every push to `master` and on pull requests:
+
+1. `npm run lint -- --max-warnings=0`
+2. `npm run typecheck`
+3. `npm run verify:data`
+4. `npm test -- --ci`
 
 ## Notes
 
