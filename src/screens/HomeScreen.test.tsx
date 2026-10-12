@@ -21,4 +21,5 @@ it('renders the home screen with play actions', () => {
   expect(screen.getByText('Play Daily')).toBeOnTheScreen();
   expect(screen.getByText('Explorer Mode')).toBeOnTheScreen();
   expect(screen.getByText('Speed Run')).toBeOnTheScreen();
+  expect(screen.getByText('Race a friend')).toBeOnTheScreen();
 });

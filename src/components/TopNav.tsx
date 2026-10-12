@@ -21,6 +21,11 @@ export const TopNav = () => {
             <Text style={styles.linkText}>Stats</Text>
           </Pressable>
         </Link>
+        <Link href="/game/race" asChild>
+          <Pressable hitSlop={8}>
+            <Text style={styles.linkText}>Race</Text>
+          </Pressable>
+        </Link>
       </View>
     </View>
   );

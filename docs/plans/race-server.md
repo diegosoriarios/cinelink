@@ -73,7 +73,65 @@ full verification gate (`npm test`, `npm run test:server`, lint, typecheck, `exp
 
 ## Status
 
-- [ ] S1
-- [ ] S2
-- [ ] S3
-- [ ] S4
+- [x] S1 — server foundation + TMDB proxy cut-over (REST room create/peek, WS upgrade, `join`,
+  host election, max 2 players, tests). Merged in PR #1.
+- [ ] S2 — race logic (phase machine, puzzle dealing, `start`/`progress`/`claim`/`rematch`,
+  claim validation with cache, timeout/forfeit/draw). **Server still only handles `join`.**
+- [x] S3 — client (routes, Home button, net layer, store, RaceScreen, CreditsBrowser extraction,
+  tests). Implemented; not yet functional because S2 is missing.
+- [ ] S4 — polish + full production verification.
+
+## Next up — make multiplayer actually work in production
+
+Ordered; 1–3 are required for a race to run at all.
+
+1. **Server S2 (`server/race-rooms.ts`, `server/app.ts`)**
+   - Phase machine `lobby → countdown (3s) → racing (5:00) → finished`.
+   - Deal a random distinct pair per round/rematch from `src/data/tmdbPool.json` (add `server/pool.ts`).
+   - Handle WS messages `start` (host only), `progress`, `claim`, `rematch`, `leave`
+     (currently every non-`join` message returns `MUST_JOIN_FIRST` — `server/app.ts:76-83`).
+   - Include `start`/`target` in the `roomState` payload (`server/race-rooms.ts:63-72` currently
+     sends only `{code, phase, players}`); the client only renders the race when both are present.
+   - Server-side claim validation hop-by-hop via TMDB `movie_credits` (in-memory cache, 24h TTL)
+     reusing `src/game/chainRules.ts`; first valid claim wins; timeout ⇒ most hops / draw;
+     disconnect ⇒ 30s grace ⇒ forfeit.
+   - Vitest: valid/invalid claim, double-claim ordering, timeout tiebreak, forfeit, rematch.
+
+2. **CORS on `/race/*` (web build)**
+   - CORS is only applied inside the `/tmdb` router (`server/tmdb.ts:18-27`). `POST /race/rooms`
+     and `GET /race/rooms/:code` (`server/app.ts:44-60`) set no CORS headers, so the Vercel
+     origin's browser blocks them. Move the CORS middleware to app level (or add it to the race
+     routes). Native builds are unaffected, but web will fail at "Create room" without this.
+
+3. **Configure `EXPO_PUBLIC_RACE_URL` in production builds**
+   - Vercel project env (web build runs `npm run export:web`).
+   - `.github/workflows/release-apk.yml` injects only `EXPO_PUBLIC_TMDB_PROXY_URL` and
+     `EXPO_PUBLIC_APP_URL`; add `EXPO_PUBLIC_RACE_URL` (from a repo variable) to the "Prebuild"
+     and "Build release APK" steps.
+   - Any EAS profile (`eas.json`) if used.
+   - Value = the Render server origin (same host as `EXPO_PUBLIC_TMDB_PROXY_URL`),
+     e.g. `https://cinelink-server.onrender.com`.
+
+4. **Cold-start resilience (optional polish)**
+   - Render free tier can take 30-60s to wake. `RaceSocket` reconnects, but the initial
+     `createRaceRoom`/`peekRaceRoom` fetches have no retry — add a small retry/backoff so the
+     first "Create/Join" after idle doesn't hard-fail.
+
+5. **S4 polish + gate**
+   - Disconnect banners, join-rejection UX, race share text, reconnect-after-sleep recovery.
+   - Run `npm test`, `npm run test:server`, lint, typecheck, `export:web`, then a live two-tab race.
+
+### Deploy reminders
+
+- `deploy-server.yml` triggers only on `server/**`, `src/data/**`, package files, so S2 changes
+  will redeploy the server automatically; the current frontend-only commit will not.
+- Render free tier drops connections on deploy — client reconnect (already implemented) is required.
+
+### Frontend contract implemented (for reference when building S2)
+
+Client → server: `join {playerId, nickname}`, `start`, `progress {hops, currentPersonName}`,
+`claim {path}`, `rematch`, `leave`.
+Server → client: `roomState {state:{code, phase, players, start?, target?}}`,
+`countdown {endsAt}`, `progress {playerId, hops, currentPersonName?}`,
+`finished {winnerId, reason, path?}`, `error {code}`.
+Types live in `src/types/race.ts`.
