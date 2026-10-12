@@ -15,7 +15,7 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - Stats and streak tracking persisted in AsyncStorage
 - Shareable emoji result strings
 - Web export + Vercel deployment config
-- Cloudflare Worker proxy option for API key protection
+- Node server (`server/`) for TMDB proxy + realtime race rooms (Render deployment)
 
 ## Project Structure
 
@@ -31,7 +31,7 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - `src/data/puzzles.json` — 365 daily puzzles for 2026
 - `src/data/tmdbPool.json` — curated person pool (actors/directors)
 - `src/data/tmdbPoolIds.json` — ID-only pool list
-- `worker/tmdb-proxy.js` — Cloudflare Worker proxy
+- `server/` — Node server: TMDB proxy + race rooms (Express + ws)
 - `scripts/verify-data.mjs` — puzzle + pool integrity checks
 
 ## Gameplay Modes
@@ -207,6 +207,49 @@ Root stack in:
 
 - `metro.config.js`
 
+### Android APK releases
+
+`.github/workflows/release-apk.yml` builds a release APK with `expo prebuild` +
+Gradle and attaches it to a GitHub Release.
+
+Triggers:
+
+- pushing a tag matching `v*` (e.g. `v1.0.0`)
+- manual `workflow_dispatch` (optional `tag` input; defaults to `v<version>-rc.<run>`)
+
+The workflow overrides `expo.version` / `android.versionCode` from the tag and run
+number, builds `assembleRelease`, and uploads `cinelink-<tag>.apk`.
+
+Required repository variables (Settings → Secrets and variables → Actions → Variables):
+
+- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server.onrender.com`)
+
+Optional repository variable:
+
+- `EXPO_PUBLIC_APP_URL`
+
+Optional repository secrets for release signing. If unset, the APK is signed with
+Expo's default debug keystore (installable, but not Play Store-ready):
+
+- `ANDROID_KEYSTORE_BASE64` — base64 of your release `.keystore`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+Generate a keystore and encode it:
+
+```bash
+keytool -genkeypair -v -keystore release.keystore -alias cinelink \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 release.keystore   # paste into ANDROID_KEYSTORE_BASE64
+```
+
+Cut a release:
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
 ### EAS builds
 
 - `eas.json`
@@ -219,6 +262,13 @@ Root stack in:
 - `vercel.json`
   - build command: `npm run export:web`
   - output directory: `dist`
+  - SPA rewrite so expo-router handles dynamic routes client-side
+
+Vercel's Git integration deploys on push (no CI token required). Configure these
+build-time environment variables in the Vercel project:
+
+- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL
+- `EXPO_PUBLIC_APP_URL` — public site URL (used for OG metadata)
 
 ### Open Graph metadata
 
@@ -240,25 +290,44 @@ Output goes to:
 
 - `dist/`
 
-## Cloudflare Worker Proxy
+## CineLink Server (TMDB proxy + races)
 
-File:
+Directory:
 
-- `worker/tmdb-proxy.js`
+- `server/` — Express + `ws` (TypeScript, run with tsx)
 
 Behavior:
 
-- Proxies `/tmdb/*` to `https://api.themoviedb.org/3/*`
-- Injects `TMDB_API_KEY` from Worker secret
-- Adds permissive CORS headers
+- `GET /healthz` — health check (used by Render)
+- `GET /tmdb/*` — proxies to `https://api.themoviedb.org/3/*`
+- Injects `TMDB_API_KEY` from env
+- Path allowlist + per-IP room-creation rate limit
+- `/race/*` — room REST + WebSocket (see `docs/plans/race-server.md`)
 
-Expected Worker secret:
+Expected server secret:
 
 - `TMDB_API_KEY`
 
-Then configure client app env:
+Local development:
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-worker-domain>`
+```
+npm run dev:server   # http://localhost:8787
+npm run test:server  # vitest suite
+```
+
+Production (Render):
+
+- The repo includes a `render.yaml` blueprint — create a Blueprint instance in the
+  Render dashboard and set `TMDB_API_KEY` when prompted (runs on Node 20, health
+  check `/healthz`).
+- `autoDeploy: false` is set, so deploys are triggered by
+  `.github/workflows/deploy-server.yml` instead of Render's Git integration. Add the
+  Render Deploy Hook (service → Settings → Deploy Hook) as the
+  `RENDER_DEPLOY_HOOK_URL` GitHub Actions secret.
+
+Then configure client app env (Actions variable + Vercel env):
+
+- `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-server-domain>`
 
 ## Development
 
@@ -306,12 +375,13 @@ npm run verify:data
 
 ## Continuous Integration
 
-`.github/workflows/ci.yml` runs on every push to `master` and on pull requests:
+`.github/workflows/ci.yml` runs on every push to `main` and on pull requests:
 
 1. `npm run lint -- --max-warnings=0`
 2. `npm run typecheck`
 3. `npm run verify:data`
 4. `npm test -- --ci`
+5. `npm run test:server`
 
 ## Notes
 

@@ -1,0 +1,145 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0). Defaults to v<app.json version>-rc.<run_number>'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve release tag and set app version
+        id: version
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          APP_VERSION=$(node -p "require('./app.json').expo.version")
+          if [ -n "${INPUT_TAG:-}" ]; then
+            TAG="$INPUT_TAG"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="v${APP_VERSION}-rc.${GITHUB_RUN_NUMBER}"
+          fi
+          VERSION="${TAG#v}"
+          VERSION="${VERSION%%-*}"
+          node -e "
+            const fs = require('fs');
+            const app = require('./app.json');
+            app.expo.version = '${VERSION}';
+            app.expo.android = app.expo.android || {};
+            app.expo.android.versionCode = Number('${GITHUB_RUN_NUMBER}');
+            fs.writeFileSync('./app.json', JSON.stringify(app, null, 2) + '\n');
+          "
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Prebuild Android project
+        env:
+          EXPO_PUBLIC_TMDB_PROXY_URL: ${{ vars.EXPO_PUBLIC_TMDB_PROXY_URL }}
+          EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "No keystore secret set; using Expo's default debug-signed release build."
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          cat > android/app/keystore.properties <<EOF
+          storeFile=release.keystore
+          storePassword=${ANDROID_KEYSTORE_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          EOF
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'android/app/build.gradle';
+          let gradle = fs.readFileSync(path, 'utf8');
+          const releaseConfig = [
+            '        release {',
+            "            def keystoreProps = new Properties()",
+            "            keystoreProps.load(new FileInputStream(rootProject.file('app/keystore.properties')))",
+            "            storeFile file(keystoreProps['storeFile'])",
+            "            storePassword keystoreProps['storePassword']",
+            "            keyAlias keystoreProps['keyAlias']",
+            "            keyPassword keystoreProps['keyPassword']",
+            '        }',
+          ].join('\n');
+          // Point the release buildType at the new signing config BEFORE inserting the
+          // signingConfigs.release block, otherwise the regex below would match it first.
+          const releasePattern = /(release\s*\{[\s\S]*?)signingConfig signingConfigs\.debug/;
+          if (!releasePattern.test(gradle)) {
+            throw new Error('Could not locate release signingConfig in android/app/build.gradle');
+          }
+          gradle = gradle.replace(releasePattern, '$1signingConfig signingConfigs.release');
+          gradle = gradle.replace('    signingConfigs {\n', '    signingConfigs {\n' + releaseConfig + '\n');
+          fs.writeFileSync(path, gradle);
+          console.log('Configured release signing from android/app/keystore.properties');
+          NODE
+
+      - name: Build release APK
+        env:
+          EXPO_PUBLIC_TMDB_PROXY_URL: ${{ vars.EXPO_PUBLIC_TMDB_PROXY_URL }}
+          EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
+        run: |
+          set -euo pipefail
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Prepare artifact
+        id: artifact
+        run: |
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          test -f "$APK"
+          OUT="cinelink-${{ steps.version.outputs.tag }}.apk"
+          cp "$APK" "$OUT"
+          echo "path=${OUT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: CineLink ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          files: ${{ steps.artifact.outputs.path }}
+          generate_release_notes: true

@@ -10,7 +10,7 @@ module.exports = [
     ignores: ['dist/**', 'node_modules/**', '.expo/**', '.abacusai/**']
   },
   {
-    files: ['eslint.config.js', 'jest.config.js'],
+    files: ['eslint.config.js', 'jest.config.js', 'vitest.config.ts'],
     languageOptions: {
       globals: {
         ...globals.node
@@ -18,10 +18,10 @@ module.exports = [
     }
   },
   {
-    files: ['worker/**/*.js'],
+    files: ['server/**/*.ts'],
     languageOptions: {
       globals: {
-        ...globals.serviceworker
+        ...globals.node
       }
     }
   },

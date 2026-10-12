@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cinelink-server
+    runtime: node
+    plan: free
+    # Deploys are triggered by the RENDER_DEPLOY_HOOK_URL GitHub Actions workflow,
+    # not by Render's own Git integration.
+    autoDeploy: false
+    buildCommand: npm ci
+    startCommand: npm run start:server
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: TMDB_API_KEY
+        sync: false
