@@ -37,6 +37,10 @@ export default function HomeScreen() {
         <Link href="/game/speedrun" asChild>
           <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Speed Run</Text></Pressable>
         </Link>
+
+        <Link href="/game/race" asChild>
+          <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Race a friend</Text></Pressable>
+        </Link>
       </View>
     </View>
   );

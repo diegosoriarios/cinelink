@@ -73,7 +73,45 @@ full verification gate (`npm test`, `npm run test:server`, lint, typecheck, `exp
 
 ## Status
 
-- [ ] S1
-- [ ] S2
-- [ ] S3
-- [ ] S4
+- [x] S1 — server foundation + TMDB proxy cut-over (REST room create/peek, WS upgrade, `join`,
+  host election, max 2 players, tests). Merged in PR #1.
+- [x] S2 — race logic (phase machine, puzzle dealing, `start`/`progress`/`claim`/`rematch`, claim
+  validation with cache, timeout/forfeit/draw). Implemented in `server/race-rooms.ts`,
+  `server/race-validator.ts`, `server/pool.ts` and wired in `server/app.ts`.
+- [x] S3 — client (routes, Home button, net layer, store, RaceScreen, CreditsBrowser extraction,
+  tests).
+- [ ] S4 — polish + full production verification.
+
+## Next up — polish and production verification
+
+1. **Server S2** — ✅ done (`server/race-rooms.ts`, `server/race-validator.ts`, `server/pool.ts`,
+   `server/app.ts`). Phase machine, random pair dealing, `start`/`progress`/`claim`/`rematch`/
+   `leave`, server-side claim validation with a 24h credits cache, timeout (fewest hops wins,
+   tie = draw), 30s disconnect grace → forfeit. Covered by `test:server`.
+2. **CORS on `/race/*` (web build)** — ✅ done. CORS is now applied app-wide in `server/app.ts`.
+3. **Configure `EXPO_PUBLIC_RACE_URL` in production builds** — `release-apk.yml` now injects it
+   (add an Actions repo variable `EXPO_PUBLIC_RACE_URL`). Still set it in the Vercel project env.
+
+4. **Cold-start resilience (optional polish)**
+   - Render free tier can take 30-60s to wake. `RaceSocket` reconnects, but the initial
+     `createRaceRoom`/`peekRaceRoom` fetches have no retry — add a small retry/backoff so the
+     first "Create/Join" after idle doesn't hard-fail.
+
+5. **S4 polish + gate**
+   - Disconnect banners, join-rejection UX, race share text, reconnect-after-sleep recovery.
+   - Run `npm test`, `npm run test:server`, lint, typecheck, `export:web`, then a live two-tab race.
+
+### Deploy reminders
+
+- `deploy-server.yml` triggers only on `server/**`, `src/data/**`, package files, so S2 changes
+  will redeploy the server automatically; the current frontend-only commit will not.
+- Render free tier drops connections on deploy — client reconnect (already implemented) is required.
+
+### Frontend contract implemented (for reference when building S2)
+
+Client → server: `join {playerId, nickname}`, `start`, `progress {hops, currentPersonName}`,
+`claim {path}`, `rematch`, `leave`.
+Server → client: `roomState {state:{code, phase, players, start?, target?}}`,
+`countdown {endsAt}`, `progress {playerId, hops, currentPersonName?}`,
+`finished {winnerId, reason, path?}`, `error {code}`.
+Types live in `src/types/race.ts`.

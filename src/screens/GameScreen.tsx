@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -12,14 +11,8 @@ import {
   Text,
   View
 } from 'react-native';
-import {
-  getImageUrl,
-  getMovieCredits,
-  getPersonCredits,
-  getPersonDetails,
-  type MovieCreditsResponse,
-  type PersonCreditsResponse
-} from '../api/tmdb';
+import { getPersonCredits, getPersonDetails } from '../api/tmdb';
+import { Avatar, CreditsBrowser } from '../components/CreditsBrowser';
 import { useGameState } from '../game/gameState';
 import { HINT_COUNT, pickHintMovies, type HintMovie } from '../game/hints';
 import { useIsWideScreen } from '../hooks/useIsWideScreen';
@@ -78,43 +71,6 @@ const Confetti = () => {
   return <View pointerEvents="none" style={styles.confettiContainer}>{pieces}</View>;
 };
 
-const releaseTime = (movie: MovieLite) => (movie.release_date ? Date.parse(movie.release_date) : 0);
-
-const byReleaseDesc = (a: MovieLite, b: MovieLite) => releaseTime(b) - releaseTime(a);
-
-const normalizeMovies = (credits: PersonCreditsResponse): MovieLite[] => {
-  const seen = new Set<number>();
-  const movies: MovieLite[] = [];
-  const push = (movie: { id: number; title: string; release_date?: string; poster_path?: string | null }) => {
-    if (!movie?.id || !movie.title || seen.has(movie.id)) {
-      return;
-    }
-    seen.add(movie.id);
-    movies.push({ id: movie.id, title: movie.title, release_date: movie.release_date, poster_path: movie.poster_path ?? null });
-  };
-  credits.cast.forEach(push);
-  credits.crew.forEach(push);
-  return movies.sort(byReleaseDesc);
-};
-
-const normalizeDirectors = (credits: MovieCreditsResponse): PersonLite[] => {
-  const seen = new Set<number>();
-  const directors: PersonLite[] = [];
-  for (const member of credits.crew) {
-    if (member.department !== 'Directing' || member.job !== 'Director' || seen.has(member.id)) {
-      continue;
-    }
-    seen.add(member.id);
-    directors.push({ id: member.id, name: member.name, profile_path: member.profile_path });
-  }
-  return directors;
-};
-
-const normalizeCast = (credits: MovieCreditsResponse): PersonLite[] =>
-  credits.cast.map((member) => ({ id: member.id, name: member.name, profile_path: member.profile_path }));
-
-const CAST_PREVIEW_COUNT = 15;
-
 export const GameScreen = ({ mode }: Props) => {
   const {
     initMode,
@@ -140,24 +96,11 @@ export const GameScreen = ({ mode }: Props) => {
   const [message, setMessage] = useState<string | null>(null);
   const [personMap, setPersonMap] = useState<Record<number, PersonLite>>({});
   const [initError, setInitError] = useState<{ mode: GameMode; message: string } | null>(null);
-  const [personCredits, setPersonCredits] = useState<{ personId: number; movies: MovieLite[]; error: boolean } | null>(null);
-  const [creditsToken, setCreditsToken] = useState(0);
-  const [picked, setPicked] = useState<{ personId: number; movie: MovieLite } | null>(null);
-  const [movieCredits, setMovieCredits] = useState<{ movieId: number; directors: PersonLite[]; cast: PersonLite[]; error: boolean } | null>(null);
-  const [showFullCast, setShowFullCast] = useState(false);
   const [targetHints, setTargetHints] = useState<{ personId: number; movies: HintMovie[] } | null>(null);
   const [hintsShown, setHintsShown] = useState(0);
 
   const currentPersonId = path[path.length - 1];
   const gameActive = !hasWon && !hasLost;
-  const activeCredits = personCredits && personCredits.personId === currentPersonId ? personCredits : null;
-  const moviesLoading = gameActive && !activeCredits;
-  const moviesError = activeCredits?.error === true;
-  const movies = activeCredits && !activeCredits.error ? activeCredits.movies : null;
-  const activePick = picked && picked.personId === currentPersonId ? picked : null;
-  const activeMovieCredits = activePick && movieCredits && movieCredits.movieId === activePick.movie.id ? movieCredits : null;
-  const creditsLoading = Boolean(activePick) && !activeMovieCredits;
-  const visibleCast = activeMovieCredits && !activeMovieCredits.error ? (showFullCast ? activeMovieCredits.cast : activeMovieCredits.cast.slice(0, CAST_PREVIEW_COUNT)) : [];
   const activeHints = targetHints && targetPerson && targetHints.personId === targetPerson.id ? targetHints.movies : null;
   const revealedCount = hasWon || hasLost ? HINT_COUNT : hintsShown;
   const revealedHints = activeHints ? activeHints.slice(0, revealedCount) : [];
@@ -211,59 +154,6 @@ export const GameScreen = ({ mode }: Props) => {
   }, [path, personMap]);
 
   useEffect(() => {
-    if (!gameActive || !currentPersonId) {
-      return;
-    }
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const credits = await getPersonCredits(currentPersonId);
-        if (cancelled) {
-          return;
-        }
-        setPersonCredits({ personId: currentPersonId, movies: normalizeMovies(credits), error: false });
-      } catch {
-        if (!cancelled) {
-          setPersonCredits({ personId: currentPersonId, movies: [], error: true });
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [currentPersonId, gameActive, creditsToken]);
-
-  useEffect(() => {
-    if (!activePick || !gameActive) {
-      return;
-    }
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const credits = await getMovieCredits(activePick.movie.id);
-        if (cancelled) {
-          return;
-        }
-        setMovieCredits({
-          movieId: activePick.movie.id,
-          directors: normalizeDirectors(credits),
-          cast: normalizeCast(credits),
-          error: false
-        });
-      } catch {
-        if (!cancelled) {
-          setMovieCredits({ movieId: activePick.movie.id, directors: [], cast: [], error: true });
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [activePick, gameActive]);
-
-  useEffect(() => {
     const targetId = targetPerson?.id;
     if (!targetId) {
       return;
@@ -289,52 +179,31 @@ export const GameScreen = ({ mode }: Props) => {
     };
   }, [targetPerson?.id]);
 
-  const onMovieSelect = (movie: MovieLite) => {
-    setShowFullCast(false);
-    setMovieCredits(null);
-    setPicked({ personId: currentPersonId, movie });
-  };
-
-  const onSelectPerson = async (person: PersonLite) => {
-    if (!activePick) {
-      return;
-    }
-    const result = await addHop(person.id, { id: activePick.movie.id, title: activePick.movie.title });
+  const onHop = async (person: PersonLite, movie: MovieLite) => {
+    const result = await addHop(person.id, { id: movie.id, title: movie.title });
     if (!result.ok) {
       setMessage(result.reason ?? 'Invalid hop');
-      return;
+      return false;
     }
     setPersonMap((current) => ({
       ...current,
       [person.id]: person
     }));
-    setPicked(null);
-    setMovieCredits(null);
     setMessage(null);
+    return true;
   };
 
   const onUndo = () => {
     if (undoHop()) {
-      setPicked(null);
-      setMovieCredits(null);
       setMessage(null);
     }
   };
 
   const onNextRound = () => {
-    setPicked(null);
-    setMovieCredits(null);
-    setPersonCredits(null);
-    setShowFullCast(false);
     setMessage(null);
     resetCurrentMode().catch(() => {
       setInitError({ mode, message: 'Could not load the next round. Check your connection and try again.' });
     });
-  };
-
-  const onBackToMovies = () => {
-    setPicked(null);
-    setMovieCredits(null);
   };
 
   const onShare = async () => {
@@ -417,70 +286,13 @@ export const GameScreen = ({ mode }: Props) => {
     ) : null;
 
   const browser = gameActive ? (
-    <ScrollView style={styles.browser}>
-      {activePick ? (
-        <View>
-          <View style={styles.browserHeader}>
-            <View style={styles.browserHeading}>
-              <Text style={styles.browserTitle} numberOfLines={1}>{activePick.movie.title}</Text>
-              <Text style={styles.browserSubtitle}>Select a person to continue the chain</Text>
-            </View>
-            <Pressable style={styles.linkButton} onPress={onBackToMovies}>
-              <Text style={styles.linkButtonText}>← Movies</Text>
-            </Pressable>
-          </View>
-          {creditsLoading ? <ActivityIndicator color="#cbd5e1" style={styles.loader} /> : null}
-          {activeMovieCredits?.error ? <Text style={styles.errorMessage}>Could not load this movie's credits.</Text> : null}
-          {activeMovieCredits && !activeMovieCredits.error ? (
-            <View>
-              {activeMovieCredits.directors.length > 0 ? <Text style={styles.groupTitle}>Directors</Text> : null}
-              {activeMovieCredits.directors.map((person) => (
-                <PersonRow
-                  key={`director-${person.id}`}
-                  person={person}
-                  isTarget={targetPerson?.id === person.id}
-                  onPress={onSelectPerson}
-                />
-              ))}
-              {activeMovieCredits.cast.length > 0 ? <Text style={styles.groupTitle}>Cast</Text> : null}
-              {visibleCast.map((person) => (
-                <PersonRow
-                  key={`cast-${person.id}`}
-                  person={person}
-                  isTarget={targetPerson?.id === person.id}
-                  onPress={onSelectPerson}
-                />
-              ))}
-              {activeMovieCredits.cast.length > CAST_PREVIEW_COUNT ? (
-                <Pressable style={styles.linkButton} onPress={() => setShowFullCast((value) => !value)}>
-                  <Text style={styles.linkButtonText}>
-                    {showFullCast ? 'Show less' : `Show all cast (${activeMovieCredits.cast.length})`}
-                  </Text>
-                </Pressable>
-              ) : null}
-            </View>
-          ) : null}
-        </View>
-      ) : (
-        <View>
-          <Text style={styles.browserTitle}>{personMap[currentPersonId]?.name ?? startPerson.name}</Text>
-          <Text style={styles.browserSubtitle}>Select a movie to see its cast and directors</Text>
-          {moviesLoading ? <ActivityIndicator color="#cbd5e1" style={styles.loader} /> : null}
-          {moviesError ? (
-            <View>
-              <Text style={styles.errorMessage}>Could not load this person's movies.</Text>
-              <Pressable style={styles.linkButton} onPress={() => setCreditsToken((token) => token + 1)}>
-                <Text style={styles.linkButtonText}>Retry</Text>
-              </Pressable>
-            </View>
-          ) : null}
-          {movies && movies.length === 0 ? (
-            <Text style={styles.errorMessage}>No movies found. Use Undo to go back.</Text>
-          ) : null}
-          {movies ? movies.map((movie) => <MovieRow key={movie.id} movie={movie} onPress={() => onMovieSelect(movie)} />) : null}
-        </View>
-      )}
-    </ScrollView>
+    <CreditsBrowser
+      key={currentPersonId}
+      personId={currentPersonId}
+      personName={personMap[currentPersonId]?.name ?? startPerson.name}
+      targetPersonId={targetPerson?.id ?? null}
+      onHop={onHop}
+    />
   ) : null;
 
   const winCard = hasWon ? (
@@ -594,15 +406,6 @@ export const GameScreen = ({ mode }: Props) => {
   );
 };
 
-const Avatar = ({ path, size }: { path: string | null; size: number }) => {
-  const uri = getImageUrl(path);
-  return uri ? (
-    <Image source={{ uri }} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#1e293b' }} />
-  ) : (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#334155' }} />
-  );
-};
-
 const PersonCard = ({ label, name, profilePath }: { label: string; name: string; profilePath: string | null }) => {
   return (
     <View style={styles.personCard}>
@@ -610,42 +413,6 @@ const PersonCard = ({ label, name, profilePath }: { label: string; name: string;
       <Text style={styles.personLabel}>{label}</Text>
       <Text style={styles.personName}>{name}</Text>
     </View>
-  );
-};
-
-const PersonRow = ({ person, isTarget, onPress }: { person: PersonLite; isTarget: boolean; onPress: (person: PersonLite) => void }) => {
-  return (
-    <Pressable style={[styles.personRow, isTarget ? styles.personRowTarget : null]} onPress={() => onPress(person)}>
-      <Avatar path={person.profile_path} size={36} />
-      <Text style={styles.personRowName} numberOfLines={1}>{person.name}</Text>
-      {isTarget ? (
-        <View style={styles.targetBadge}>
-          <Text style={styles.targetBadgeText}>TARGET</Text>
-        </View>
-      ) : null}
-    </Pressable>
-  );
-};
-
-const Poster = ({ path, width }: { path: string | null; width: number }) => {
-  const uri = getImageUrl(path);
-  const height = Math.round(width * 1.5);
-  return uri ? (
-    <Image source={{ uri }} style={{ width, height, borderRadius: 6, backgroundColor: '#1e293b' }} />
-  ) : (
-    <View style={{ width, height, borderRadius: 6, backgroundColor: '#334155' }} />
-  );
-};
-
-const MovieRow = ({ movie, onPress }: { movie: MovieLite; onPress: () => void }) => {
-  return (
-    <Pressable style={styles.movieRow} onPress={onPress}>
-      <Poster path={movie.poster_path ?? null} width={40} />
-      <View style={styles.movieRowText}>
-        <Text style={styles.movieRowTitle} numberOfLines={1}>{movie.title}</Text>
-        {movie.release_date ? <Text style={styles.movieRowYear}>{movie.release_date.slice(0, 4)}</Text> : null}
-      </View>
-    </Pressable>
   );
 };
 

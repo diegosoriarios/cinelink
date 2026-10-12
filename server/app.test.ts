@@ -1,20 +1,32 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { WebSocket } from 'ws';
-import { createApp } from './app';
-import type { RoomStateMessage } from './race-rooms';
+import { createApp, type CreateAppOptions } from './app';
+import type {
+  CountdownMessage,
+  ErrorMessage,
+  FinishedMessage,
+  ProgressMessage,
+  RoomStateMessage,
+  ServerMessage
+} from './race-rooms';
 
-const startServer = async () => {
-  const { server, roomStore } = createApp();
+const startServer = async (options?: CreateAppOptions) => {
+  const { server, roomStore } = createApp(options);
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
   return { server, port, roomStore };
 };
 
+const openSockets: WebSocket[] = [];
+
 const connectRoom = (port: number, code: string) =>
   new Promise<WebSocket>((resolve, reject) => {
     const ws = new WebSocket(`ws://127.0.0.1:${port}/race/rooms/${code}/ws`);
-    ws.on('open', () => resolve(ws));
+    ws.on('open', () => {
+      openSockets.push(ws);
+      resolve(ws);
+    });
     ws.on('error', reject);
   });
 
@@ -24,6 +36,32 @@ const nextMessage = (ws: WebSocket, ms = 2000) =>
     const timer = setTimeout(() => reject(new Error('message timeout')), ms);
     ws.once('close', () => clearTimeout(timer));
   });
+
+const inboxes = new WeakMap<WebSocket, ServerMessage[]>();
+
+const waitFor = async <T extends ServerMessage>(
+  ws: WebSocket,
+  predicate: (message: ServerMessage) => boolean,
+  ms = 3000
+): Promise<T> => {
+  let queue = inboxes.get(ws);
+  if (!queue) {
+    queue = [];
+    inboxes.set(ws, queue);
+    ws.on('message', (data) => queue?.push(JSON.parse(data.toString()) as ServerMessage));
+  }
+  const deadline = Date.now() + ms;
+  for (;;) {
+    const index = queue.findIndex(predicate);
+    if (index >= 0) {
+      return queue.splice(index, 1)[0] as T;
+    }
+    if (Date.now() > deadline) {
+      throw new Error('waitFor timeout');
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+};
 
 describe('server app', () => {
   let server: import('node:http').Server;
@@ -36,6 +74,11 @@ describe('server app', () => {
   });
 
   afterAll(async () => {
+    for (const ws of openSockets) {
+      ws.terminate();
+    }
+    server.closeAllConnections?.();
+    server.closeIdleConnections?.();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
 
@@ -49,6 +92,9 @@ describe('server app', () => {
 
   describe('tmdb proxy', () => {
     const originalKey = process.env.TMDB_API_KEY;
+    // The proxy uses the global `fetch`; stubGlobal also intercepts this test's own
+    // client requests, so capture the real implementation before stubbing.
+    const realFetch = globalThis.fetch.bind(globalThis);
 
     afterEach(() => {
       vi.unstubAllGlobals();
@@ -64,7 +110,7 @@ describe('server app', () => {
       const upstream = vi.fn(async (_input: string | URL) => new Response('{"id":123}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
       vi.stubGlobal('fetch', upstream);
 
-      const response = await fetch(`${baseUrl}/tmdb/person/123/movie_credits`);
+      const response = await realFetch(`${baseUrl}/tmdb/person/123/movie_credits`);
       const body = await response.json();
 
       expect(response.status).toBe(200);
@@ -80,7 +126,7 @@ describe('server app', () => {
       const upstream = vi.fn(async (_input: string | URL) => new Response('{}', { status: 200 }));
       vi.stubGlobal('fetch', upstream);
 
-      await fetch(`${baseUrl}/tmdb/search/person?query=tom&api_key=sneaky`);
+      await realFetch(`${baseUrl}/tmdb/search/person?query=tom&api_key=sneaky`);
 
       const calledUrl = new URL(upstream.mock.calls[0][0] as string);
       expect(calledUrl.searchParams.get('api_key')).toBe('test-key');
@@ -92,7 +138,7 @@ describe('server app', () => {
       const upstream = vi.fn((_input: string | URL) => Promise.resolve(new Response('{}')));
       vi.stubGlobal('fetch', upstream);
 
-      const response = await fetch(`${baseUrl}/tmdb/configuration`);
+      const response = await realFetch(`${baseUrl}/tmdb/configuration`);
 
       expect(response.status).toBe(404);
       expect(upstream).not.toHaveBeenCalled();
@@ -101,13 +147,13 @@ describe('server app', () => {
     it('returns 500 when the api key is missing', async () => {
       delete process.env.TMDB_API_KEY;
 
-      const response = await fetch(`${baseUrl}/tmdb/person/123`);
+      const response = await realFetch(`${baseUrl}/tmdb/person/123`);
 
       expect(response.status).toBe(500);
     });
 
     it('answers preflight requests', async () => {
-      const response = await fetch(`${baseUrl}/tmdb/person/123`, { method: 'OPTIONS' });
+      const response = await realFetch(`${baseUrl}/tmdb/person/123`, { method: 'OPTIONS' });
 
       expect(response.status).toBe(204);
       expect(response.headers.get('access-control-allow-origin')).toBe('*');
@@ -189,6 +235,118 @@ describe('server app', () => {
 
     it('destroys upgrade attempts for unknown rooms', async () => {
       await expect(connectRoom(port, 'ZZZZ')).rejects.toThrow();
+    });
+  });
+
+  describe('race websocket flow', () => {
+    const dealPair = () => ({
+      start: { id: 1, name: 'Start', profile_path: null },
+      target: { id: 9, name: 'Target', profile_path: null }
+    });
+    const getCredits = async (personId: number) => {
+      const credits: Record<number, number[]> = { 1: [100], 2: [100, 200], 9: [200] };
+      return new Set(credits[personId] ?? []);
+    };
+
+    let raceServer: import('node:http').Server;
+    let racePort: number;
+    let raceBase: string;
+
+    beforeAll(async () => {
+      ({ server: raceServer, port: racePort } = await startServer({
+        dealPair,
+        getCredits,
+        roomDeps: { countdownMs: 20 },
+        disconnectGraceMs: 30
+      }));
+      raceBase = `http://127.0.0.1:${racePort}`;
+    });
+
+    afterAll(async () => {
+      for (const ws of openSockets) {
+        ws.terminate();
+      }
+      raceServer.closeAllConnections?.();
+      raceServer.closeIdleConnections?.();
+      await new Promise<void>((resolve) => raceServer.close(() => resolve()));
+    });
+
+    const createRoom = async () => {
+      const response = await fetch(`${raceBase}/race/rooms`, { method: 'POST' });
+      return ((await response.json()) as { code: string }).code;
+    };
+
+    const joinRoom = (ws: WebSocket, playerId: string, nickname: string) =>
+      ws.send(JSON.stringify({ type: 'join', playerId, nickname }));
+
+    const setLobby = async (alice: WebSocket, bob: WebSocket) => {
+      await joinRoom(alice, 'p1', 'Alice');
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState');
+      await joinRoom(bob, 'p2', 'Bob');
+      await waitFor<RoomStateMessage>(bob, (m) => m.type === 'roomState');
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.players.length === 2);
+    };
+
+    const raceToRacing = async (alice: WebSocket, bob: WebSocket) => {
+      await setLobby(alice, bob);
+      await alice.send(JSON.stringify({ type: 'start' }));
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.start !== null);
+      await waitFor<CountdownMessage>(alice, (m) => m.type === 'countdown');
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.phase === 'racing');
+      await waitFor<RoomStateMessage>(bob, (m) => m.type === 'roomState' && m.state.phase === 'racing');
+    };
+
+    it('runs start, progress, claim rejection, a valid claim and rematch', async () => {
+      const code = await createRoom();
+      const alice = await connectRoom(racePort, code);
+      const bob = await connectRoom(racePort, code);
+
+      await joinRoom(alice, 'p1', 'Alice');
+      const aliceLobby = await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState');
+      expect(aliceLobby.state.players).toHaveLength(1);
+
+      await joinRoom(bob, 'p2', 'Bob');
+      const aliceBoth = waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.players.length === 2);
+      await waitFor<RoomStateMessage>(bob, (m) => m.type === 'roomState');
+      await aliceBoth;
+
+      await alice.send(JSON.stringify({ type: 'start' }));
+      const started = await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.start !== null);
+      expect(started.state.start?.id).toBe(1);
+      expect(started.state.target?.id).toBe(9);
+      await waitFor<CountdownMessage>(bob, (m) => m.type === 'countdown');
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.phase === 'racing');
+      await waitFor<RoomStateMessage>(bob, (m) => m.type === 'roomState' && m.state.phase === 'racing');
+
+      await alice.send(JSON.stringify({ type: 'progress', hops: 1, currentPersonName: 'Start' }));
+      const progress = await waitFor<ProgressMessage>(bob, (m) => m.type === 'progress');
+      expect(progress).toMatchObject({ type: 'progress', playerId: 'p1', hops: 1 });
+
+      await alice.send(JSON.stringify({ type: 'claim', path: [1, 9] }));
+      const rejection = await waitFor<ErrorMessage>(alice, (m) => m.type === 'error');
+      expect(rejection.code).toBe('INVALID_CLAIM');
+
+      await alice.send(JSON.stringify({ type: 'claim', path: [1, 2, 9] }));
+      const finished = await waitFor<FinishedMessage>(bob, (m) => m.type === 'finished');
+      expect(finished).toEqual({ type: 'finished', winnerId: 'p1', reason: 'claim', path: [1, 2, 9] });
+      await waitFor<FinishedMessage>(alice, (m) => m.type === 'finished');
+
+      await alice.send(JSON.stringify({ type: 'rematch' }));
+      const lobby = await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState' && m.state.phase === 'lobby');
+      expect(lobby.state.start).toBeNull();
+    });
+
+    it('forfeits a player who disconnects mid-race', async () => {
+      const code = await createRoom();
+      const alice = await connectRoom(racePort, code);
+      const bob = await connectRoom(racePort, code);
+      await raceToRacing(alice, bob);
+
+      bob.close();
+
+      const finished = await waitFor<FinishedMessage>(alice, (m) => m.type === 'finished');
+      expect(finished.winnerId).toBe('p1');
+      expect(finished.reason).toBe('forfeit');
     });
   });
 });

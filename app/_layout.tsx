@@ -19,6 +19,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="game/[mode]" options={{ title: 'CineLink' }} />
+        <Stack.Screen name="game/race" options={{ title: 'Race a friend' }} />
       </Stack>
     </>
   );
