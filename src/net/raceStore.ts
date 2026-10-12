@@ -98,14 +98,17 @@ export const reduceRaceMessage = (state: RaceState, message: ServerMessage): Par
         personMap[room.target.id] = toPersonLite(room.target);
       }
       const enteringRace = room.phase === 'racing' && state.raceStartedAt === null;
+      const startPerson = room.start ?? state.startPerson;
       return {
         status: 'ready',
         code: room.code,
         phase: room.phase,
         players: room.players,
-        startPerson: room.start ?? state.startPerson,
+        startPerson,
         targetPerson: room.target ?? state.targetPerson,
         personMap,
+        path: enteringRace && room.start ? [room.start.id] : state.path,
+        hops: enteringRace ? [] : state.hops,
         raceStartedAt: enteringRace ? Date.now() : state.raceStartedAt
       };
     }

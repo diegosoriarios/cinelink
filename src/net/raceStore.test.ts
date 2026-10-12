@@ -27,6 +27,34 @@ describe('reduceRaceMessage', () => {
     expect(next.personMap?.[1]?.name).toBe('Start');
     expect(next.personMap?.[9]?.name).toBe('Target');
     expect(next.raceStartedAt).toEqual(expect.any(Number));
+    expect(next.path).toEqual([1]);
+    expect(next.hops).toEqual([]);
+  });
+
+  it('does not reseed the path when an already-started race syncs again', () => {
+    const base = {
+      ...initialRaceState,
+      startPerson: person(1, 'Start'),
+      targetPerson: person(9, 'Target'),
+      raceStartedAt: 1000,
+      path: [1, 2],
+      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMovieId: 10, sharedMovieTitle: 'Movie' }]
+    };
+
+    const next = reduceRaceMessage(base, {
+      type: 'roomState',
+      state: {
+        code: 'ABCD',
+        phase: 'racing',
+        players: [{ playerId: 'me', nickname: 'Me', isHost: true }],
+        start: person(1, 'Start'),
+        target: person(9, 'Target')
+      }
+    });
+
+    expect(next.path).toEqual([1, 2]);
+    expect(next.hops).toHaveLength(1);
+    expect(next.raceStartedAt).toBe(1000);
   });
 
   it('records the countdown deadline', () => {

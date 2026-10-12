@@ -75,42 +75,22 @@ full verification gate (`npm test`, `npm run test:server`, lint, typecheck, `exp
 
 - [x] S1 — server foundation + TMDB proxy cut-over (REST room create/peek, WS upgrade, `join`,
   host election, max 2 players, tests). Merged in PR #1.
-- [ ] S2 — race logic (phase machine, puzzle dealing, `start`/`progress`/`claim`/`rematch`,
-  claim validation with cache, timeout/forfeit/draw). **Server still only handles `join`.**
+- [x] S2 — race logic (phase machine, puzzle dealing, `start`/`progress`/`claim`/`rematch`, claim
+  validation with cache, timeout/forfeit/draw). Implemented in `server/race-rooms.ts`,
+  `server/race-validator.ts`, `server/pool.ts` and wired in `server/app.ts`.
 - [x] S3 — client (routes, Home button, net layer, store, RaceScreen, CreditsBrowser extraction,
-  tests). Implemented; not yet functional because S2 is missing.
+  tests).
 - [ ] S4 — polish + full production verification.
 
-## Next up — make multiplayer actually work in production
+## Next up — polish and production verification
 
-Ordered; 1–3 are required for a race to run at all.
-
-1. **Server S2 (`server/race-rooms.ts`, `server/app.ts`)**
-   - Phase machine `lobby → countdown (3s) → racing (5:00) → finished`.
-   - Deal a random distinct pair per round/rematch from `src/data/tmdbPool.json` (add `server/pool.ts`).
-   - Handle WS messages `start` (host only), `progress`, `claim`, `rematch`, `leave`
-     (currently every non-`join` message returns `MUST_JOIN_FIRST` — `server/app.ts:76-83`).
-   - Include `start`/`target` in the `roomState` payload (`server/race-rooms.ts:63-72` currently
-     sends only `{code, phase, players}`); the client only renders the race when both are present.
-   - Server-side claim validation hop-by-hop via TMDB `movie_credits` (in-memory cache, 24h TTL)
-     reusing `src/game/chainRules.ts`; first valid claim wins; timeout ⇒ most hops / draw;
-     disconnect ⇒ 30s grace ⇒ forfeit.
-   - Vitest: valid/invalid claim, double-claim ordering, timeout tiebreak, forfeit, rematch.
-
-2. **CORS on `/race/*` (web build)**
-   - CORS is only applied inside the `/tmdb` router (`server/tmdb.ts:18-27`). `POST /race/rooms`
-     and `GET /race/rooms/:code` (`server/app.ts:44-60`) set no CORS headers, so the Vercel
-     origin's browser blocks them. Move the CORS middleware to app level (or add it to the race
-     routes). Native builds are unaffected, but web will fail at "Create room" without this.
-
-3. **Configure `EXPO_PUBLIC_RACE_URL` in production builds**
-   - Vercel project env (web build runs `npm run export:web`).
-   - `.github/workflows/release-apk.yml` injects only `EXPO_PUBLIC_TMDB_PROXY_URL` and
-     `EXPO_PUBLIC_APP_URL`; add `EXPO_PUBLIC_RACE_URL` (from a repo variable) to the "Prebuild"
-     and "Build release APK" steps.
-   - Any EAS profile (`eas.json`) if used.
-   - Value = the Render server origin (same host as `EXPO_PUBLIC_TMDB_PROXY_URL`),
-     e.g. `https://cinelink-server.onrender.com`.
+1. **Server S2** — ✅ done (`server/race-rooms.ts`, `server/race-validator.ts`, `server/pool.ts`,
+   `server/app.ts`). Phase machine, random pair dealing, `start`/`progress`/`claim`/`rematch`/
+   `leave`, server-side claim validation with a 24h credits cache, timeout (fewest hops wins,
+   tie = draw), 30s disconnect grace → forfeit. Covered by `test:server`.
+2. **CORS on `/race/*` (web build)** — ✅ done. CORS is now applied app-wide in `server/app.ts`.
+3. **Configure `EXPO_PUBLIC_RACE_URL` in production builds** — `release-apk.yml` now injects it
+   (add an Actions repo variable `EXPO_PUBLIC_RACE_URL`). Still set it in the Vercel project env.
 
 4. **Cold-start resilience (optional polish)**
    - Render free tier can take 30-60s to wake. `RaceSocket` reconnects, but the initial
