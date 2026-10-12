@@ -14,6 +14,10 @@ jest.mock('../api/tmdb', () => ({
   getPersonCredits: jest.fn()
 }));
 
+jest.mock('../components/PosterBackground', () => ({
+  PosterBackground: () => null
+}));
+
 it('renders the home screen with play actions', () => {
   render(<HomeScreen />);
 

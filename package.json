@@ -18,6 +18,7 @@
     "dev:server": "tsx watch server/index.ts",
     "start:server": "tsx server/index.ts",
     "verify:data": "node scripts/verify-data.mjs",
+    "generate:posters": "node scripts/generate-posters.mjs",
     "export:web": "expo export --platform web"
   },
   "dependencies": {

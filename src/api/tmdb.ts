@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+export type ImageSize = 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original';
 const API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 const TMDB_PROXY_URL = process.env.EXPO_PUBLIC_TMDB_PROXY_URL;
 
@@ -167,11 +168,11 @@ const uniqueById = <T extends { id: number }>(items: T[]) => {
   return [...map.values()];
 };
 
-export const getImageUrl = (path: string | null | undefined) => {
+export const getImageUrl = (path: string | null | undefined, size: ImageSize = 'w185') => {
   if (!path) {
     return null;
   }
-  return `${TMDB_IMAGE_BASE}${path}`;
+  return `${TMDB_IMAGE_BASE}${size}${path}`;
 };
 
 export const searchPerson = async (query: string) => {

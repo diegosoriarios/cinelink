@@ -2,6 +2,8 @@ import React, { useEffect, useMemo } from 'react';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import puzzles from '../../src/data/puzzles.json';
+import posters from '../../src/data/posters.json';
+import { PosterBackground } from '../../src/components/PosterBackground';
 import { useGameState } from '../../src/game/gameState';
 
 const today = new Date().toISOString().slice(0, 10);
@@ -10,6 +12,7 @@ export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
   const streak = useGameState((s) => s.streak);
   const puzzle = useMemo(() => (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today), []);
+  const posterPaths = useMemo(() => (posters as { poster_path: string }[]).map((entry) => entry.poster_path), []);
 
   useEffect(() => {
     initMode('daily');
@@ -17,6 +20,8 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <PosterBackground paths={posterPaths} />
+      <View style={styles.overlay} pointerEvents="none" />
       <View style={styles.content}>
         <Text style={styles.title}>CineLink</Text>
         <Text style={styles.subtitle}>Connect stars through shared movie credits</Text>
@@ -47,8 +52,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#020617', padding: 20, justifyContent: 'center' },
-  content: { width: '100%', maxWidth: 560, alignSelf: 'center' },
+  container: { flex: 1, backgroundColor: '#020617', padding: 20, justifyContent: 'center', overflow: 'hidden' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,6,23,0.82)' },
+  content: { width: '100%', maxWidth: 560, alignSelf: 'center', zIndex: 1 },
   title: { color: '#f8fafc', fontSize: 40, fontWeight: '800', marginBottom: 8 },
   subtitle: { color: '#94a3b8', fontSize: 15, marginBottom: 20 },
   dailyCard: {
