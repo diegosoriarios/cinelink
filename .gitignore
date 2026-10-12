@@ -16,3 +16,6 @@ ios/
 # Android release signing (never commit)
 release.keystore
 release.keystore.b64
+
+# Vercel CLI project link
+.vercel

@@ -122,6 +122,44 @@ describe('request retry behavior', () => {
     await expect(tmdb.searchPerson('anne')).rejects.toThrow('after retries');
     expect(fetchMock).toHaveBeenCalledTimes(5);
   });
+
+  it('aborts a hung request via its timeout signal and retries', async () => {
+    jest.useFakeTimers();
+    try {
+      const { tmdb, fetchMock } = importTmdb();
+      fetchMock.mockImplementation(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            const signal = init?.signal;
+            if (!signal) {
+              reject(new TypeError('missing abort signal'));
+              return;
+            }
+            signal.addEventListener('abort', () =>
+              reject(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }))
+            );
+          })
+      );
+
+      const promise = tmdb.searchPerson('anne');
+      const expectation = expect(promise).rejects.toThrow('after retries');
+      await jest.advanceTimersByTimeAsync(10 * 60_000);
+      await expectation;
+
+      expect(fetchMock).toHaveBeenCalledTimes(5);
+      expect(fetchMock.mock.calls[0][1]).toMatchObject({ signal: expect.any(AbortSignal) });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('does not retry non-timeout network errors', async () => {
+    const { tmdb, fetchMock } = importTmdb();
+    fetchMock.mockRejectedValue(new TypeError('Network request failed'));
+
+    await expect(tmdb.searchPerson('anne')).rejects.toThrow('Network request failed');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('credits cache', () => {

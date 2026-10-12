@@ -222,8 +222,8 @@ number, builds `assembleRelease`, and uploads `cinelink-<tag>.apk`.
 
 Required repository variables (Settings → Secrets and variables → Actions → Variables):
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server.onrender.com`)
-- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host, e.g. `https://cinelink-server.onrender.com`)
+- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server-10b9.onrender.com`)
+- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host, e.g. `https://cinelink-server-10b9.onrender.com`)
 
 Optional repository variable:
 
