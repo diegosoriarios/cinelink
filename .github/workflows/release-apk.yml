@@ -68,6 +68,7 @@ jobs:
       - name: Prebuild Android project
         env:
           EXPO_PUBLIC_TMDB_PROXY_URL: ${{ vars.EXPO_PUBLIC_TMDB_PROXY_URL }}
+          EXPO_PUBLIC_RACE_URL: ${{ vars.EXPO_PUBLIC_RACE_URL }}
           EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
         run: npx expo prebuild --platform android --no-install
 
@@ -119,6 +120,7 @@ jobs:
       - name: Build release APK
         env:
           EXPO_PUBLIC_TMDB_PROXY_URL: ${{ vars.EXPO_PUBLIC_TMDB_PROXY_URL }}
+          EXPO_PUBLIC_RACE_URL: ${{ vars.EXPO_PUBLIC_RACE_URL }}
           EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
         run: |
           set -euo pipefail

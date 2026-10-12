@@ -223,6 +223,7 @@ number, builds `assembleRelease`, and uploads `cinelink-<tag>.apk`.
 Required repository variables (Settings → Secrets and variables → Actions → Variables):
 
 - `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server-10b9.onrender.com`)
+- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host, e.g. `https://cinelink-server-10b9.onrender.com`)
 
 Optional repository variable:
 
@@ -268,6 +269,7 @@ Vercel's Git integration deploys on push (no CI token required). Configure these
 build-time environment variables in the Vercel project:
 
 - `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL
+- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host)
 - `EXPO_PUBLIC_APP_URL` — public site URL (used for OG metadata)
 
 ### Open Graph metadata
@@ -304,6 +306,19 @@ Behavior:
 - Path allowlist + per-IP room-creation rate limit
 - `/race/*` — room REST + WebSocket (see `docs/plans/race-server.md`)
 
+Race rooms (`/race/*`):
+
+- `POST /race/rooms` → `{ code }`, `GET /race/rooms/:code` → lobby peek
+- WebSocket `GET /race/rooms/:code/ws`: `lobby → countdown (3s) → racing (5:00) → finished`
+- Client → server: `join`, `start` (host only), `progress`, `claim`, `rematch`, `leave`
+- Server → client: `roomState` (full sync incl. `start`/`target`), `countdown`, `progress`,
+  `finished`, `error`
+- Pairs are dealt at random from `src/data/tmdbPool.json` at each `start`/rematch
+- Claims are validated server-side hop-by-hop against TMDB `movie_credits` (24h cache);
+  the first valid claim wins, timeout awards the fewest hops (tie = draw),
+  disconnect forfeits after a 30s grace window
+- CORS is applied app-wide so the web build can reach `/race/*`
+
 Expected server secret:
 
 - `TMDB_API_KEY`
@@ -328,6 +343,7 @@ Production (Render):
 Then configure client app env (Actions variable + Vercel env):
 
 - `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-server-domain>`
+- `EXPO_PUBLIC_RACE_URL=https://<your-server-domain>`
 
 ## Development
 
