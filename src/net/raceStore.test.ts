@@ -98,6 +98,16 @@ describe('reduceRaceMessage', () => {
     );
     expect(reduceRaceMessage(initialRaceState, { type: 'error', code: 'WEIRD' }).message).toBe('Race error: WEIRD');
   });
+
+  it('returns to the entry state on roomClosed', () => {
+    const next = reduceRaceMessage(
+      { ...initialRaceState, code: 'ABCD', phase: 'racing' },
+      { type: 'roomClosed', reason: 'host_left' }
+    );
+    expect(next.code).toBeNull();
+    expect(next.phase).toBe('lobby');
+    expect(next.message).toBe('The host ended the game.');
+  });
 });
 
 describe('useRaceStore actions', () => {
@@ -147,6 +157,17 @@ describe('useRaceStore actions', () => {
 
     expect(useRaceStore.getState().code).toBe('ZZZZ');
     expect(useRaceStore.getState().players).toHaveLength(1);
+  });
+
+  it('leaves the room and resets state when the server closes the room', () => {
+    useRaceStore.setState({ ...initialRaceState, selfId: 'me', nickname: 'Me', code: 'ABCD', phase: 'racing' });
+
+    useRaceStore.getState().handleMessage({ type: 'roomClosed', reason: 'host_left' });
+
+    const state = useRaceStore.getState();
+    expect(state.code).toBeNull();
+    expect(state.phase).toBe('lobby');
+    expect(state.message).toBe('The host ended the game.');
   });
 
   it('resets transient state on rematch', () => {

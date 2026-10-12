@@ -59,6 +59,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   ROOM_NOT_FOUND: 'That room no longer exists.'
 };
 
+const ROOM_CLOSED_MESSAGES: Record<string, string> = {
+  host_left: 'The host ended the game.'
+};
+
 export const initialRaceState: RaceState = {
   status: 'idle',
   configured: isRaceConfigured(),
@@ -136,6 +140,12 @@ export const reduceRaceMessage = (state: RaceState, message: ServerMessage): Par
       };
     case 'error':
       return { message: ERROR_MESSAGES[message.code] ?? `Race error: ${message.code}` };
+    case 'roomClosed':
+      return {
+        phase: 'lobby',
+        code: null,
+        message: ROOM_CLOSED_MESSAGES[message.reason] ?? 'The room was closed.'
+      };
     default:
       return {};
   }
@@ -280,6 +290,17 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
   },
 
   handleMessage: (message) => {
+    if (message.type === 'roomClosed') {
+      closeSocket();
+      set({
+        ...initialRaceState,
+        configured: get().configured,
+        selfId: get().selfId,
+        nickname: get().nickname,
+        message: ROOM_CLOSED_MESSAGES[message.reason] ?? 'The room was closed.'
+      });
+      return;
+    }
     set((state) => reduceRaceMessage(state, message));
   }
 }));

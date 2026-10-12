@@ -33,6 +33,7 @@ export type ServerMessage =
   | { type: 'countdown'; endsAt: number }
   | { type: 'progress'; playerId: string; hops: number; currentPersonName?: string | null }
   | { type: 'finished'; winnerId: string | null; reason: string; path?: PersonId[] | null }
+  | { type: 'roomClosed'; reason: string }
   | { type: 'error'; code: string };
 
 export type ClientMessage =

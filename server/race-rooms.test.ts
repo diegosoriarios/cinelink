@@ -2,7 +2,7 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { WebSocket } from 'ws';
 import { DEFAULT_COUNTDOWN_MS, parseClientMessage, RaceRoom, RoomStore, type RaceRoomDeps } from './race-rooms';
 
-const fakeSocket = () => ({ readyState: 1, OPEN: 1, send: vi.fn() }) as unknown as WebSocket;
+const fakeSocket = () => ({ readyState: 1, OPEN: 1, send: vi.fn(), close: vi.fn() }) as unknown as WebSocket;
 
 describe('RoomStore', () => {
   it('creates rooms with unique 4-char codes', () => {
@@ -104,6 +104,69 @@ describe('RaceRoom.leaveBySocket', () => {
     expect(room.leaveBySocket(socket)).toBe(true);
     expect(room.playerCount).toBe(0);
     expect(room.leaveBySocket(fakeSocket())).toBe(false);
+  });
+});
+
+describe('RaceRoom host migration', () => {
+  it('promotes the remaining player when the host drops in the lobby', () => {
+    const room = new RaceRoom('ABCD');
+    const hostSocket = fakeSocket();
+    const guestSocket = fakeSocket();
+    room.join('p1', 'Alice', hostSocket);
+    room.join('p2', 'Bob', guestSocket);
+
+    expect(room.isHost('p1')).toBe(true);
+    expect(room.leaveBySocket(hostSocket)).toBe(true);
+    expect(room.playerCount).toBe(1);
+    expect(room.isHost('p2')).toBe(true);
+  });
+
+  it('promotes the remaining player when the host is removed', () => {
+    const room = new RaceRoom('ABCD');
+    room.join('p1', 'Alice', fakeSocket());
+    room.join('p2', 'Bob', fakeSocket());
+
+    expect(room.removePlayer('p1')).toBe(true);
+    expect(room.isHost('p2')).toBe(true);
+  });
+});
+
+describe('RaceRoom.markDisconnected', () => {
+  it('keeps the player record but flags it disconnected', () => {
+    const room = new RaceRoom('ABCD');
+    room.join('p1', 'Alice', fakeSocket());
+    room.join('p2', 'Bob', fakeSocket());
+
+    expect(room.markDisconnected('p2')).toBe(true);
+    expect(room.playerCount).toBe(2);
+    expect(room.isConnected('p2')).toBe(false);
+
+    room.join('p2', 'Bob', fakeSocket());
+    expect(room.isConnected('p2')).toBe(true);
+  });
+});
+
+describe('RaceRoom.close', () => {
+  it('broadcasts roomClosed and closes every socket exactly once', () => {
+    const room = new RaceRoom('ABCD');
+    const a = fakeSocket();
+    const b = fakeSocket();
+    room.join('p1', 'Alice', a);
+    room.join('p2', 'Bob', b);
+    vi.mocked(a.send).mockClear();
+    vi.mocked(b.send).mockClear();
+
+    room.close('host_left');
+    room.close('host_left');
+
+    expect(a.send).toHaveBeenCalledTimes(1);
+    expect(b.send).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(vi.mocked(a.send).mock.calls[0][0] as string)).toEqual({
+      type: 'roomClosed',
+      reason: 'host_left'
+    });
+    expect(room.isClosed).toBe(true);
+    expect(vi.mocked(a.close)).toHaveBeenCalledTimes(1);
   });
 });
 

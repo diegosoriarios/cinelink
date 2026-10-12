@@ -6,7 +6,9 @@ import type {
   ErrorMessage,
   FinishedMessage,
   ProgressMessage,
+  RoomClosedMessage,
   RoomStateMessage,
+  RoomStore,
   ServerMessage
 } from './race-rooms';
 
@@ -251,9 +253,10 @@ describe('server app', () => {
     let raceServer: import('node:http').Server;
     let racePort: number;
     let raceBase: string;
+    let raceRoomStore: RoomStore;
 
     beforeAll(async () => {
-      ({ server: raceServer, port: racePort } = await startServer({
+      ({ server: raceServer, port: racePort, roomStore: raceRoomStore } = await startServer({
         dealPair,
         getCredits,
         roomDeps: { countdownMs: 20 },
@@ -347,6 +350,49 @@ describe('server app', () => {
       const finished = await waitFor<FinishedMessage>(alice, (m) => m.type === 'finished');
       expect(finished.winnerId).toBe('p1');
       expect(finished.reason).toBe('forfeit');
+    });
+
+    it('ends the game for everyone when the host disconnects mid-race', async () => {
+      const code = await createRoom();
+      const alice = await connectRoom(racePort, code);
+      const bob = await connectRoom(racePort, code);
+      await raceToRacing(alice, bob);
+
+      alice.close();
+
+      const closed = await waitFor<RoomClosedMessage>(bob, (m) => m.type === 'roomClosed');
+      expect(closed.reason).toBe('host_left');
+      expect(raceRoomStore.get(code)).toBeNull();
+    });
+
+    it('keeps the race running when a guest leaves, then awards the host after grace', async () => {
+      const code = await createRoom();
+      const alice = await connectRoom(racePort, code);
+      const bob = await connectRoom(racePort, code);
+      await raceToRacing(alice, bob);
+
+      await bob.send(JSON.stringify({ type: 'leave' }));
+      await waitFor<RoomStateMessage>(alice, (m) => m.type === 'roomState');
+      expect(raceRoomStore.get(code)?.phase).toBe('racing');
+
+      const finished = await waitFor<FinishedMessage>(alice, (m) => m.type === 'finished');
+      expect(finished.winnerId).toBe('p1');
+      expect(finished.reason).toBe('forfeit');
+    });
+
+    it('migrates the host to the survivor when the host leaves the lobby', async () => {
+      const code = await createRoom();
+      const alice = await connectRoom(racePort, code);
+      const bob = await connectRoom(racePort, code);
+      await setLobby(alice, bob);
+
+      await alice.send(JSON.stringify({ type: 'leave' }));
+
+      const state = await waitFor<RoomStateMessage>(
+        bob,
+        (m) => m.type === 'roomState' && m.state.players.length === 1
+      );
+      expect(state.state.players[0]).toMatchObject({ playerId: 'p2', isHost: true });
     });
   });
 });

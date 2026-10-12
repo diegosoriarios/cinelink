@@ -39,10 +39,17 @@ Phases: `lobby → countdown (3s) → racing (5:00) → finished`.
 - Client → server: `join {playerId, nickname}`, `start` (host only), `progress {hops, currentPersonName}`,
   `claim {path}`, `rematch`, `leave`
 - Server → client: `roomState` (full sync on join/reconnect), `countdown {endsAt}`,
-  `progress`, `finished {winnerId, path, reason}`, `error {code}`
+  `progress`, `finished {winnerId, path, reason}`, `roomClosed {reason}`, `error {code}`
 
 End conditions: first **valid** claim wins (invalid claim rejected, claimant keeps racing);
-timeout at 5:00 → most hops wins / draw; disconnect → 30s grace → forfeit; rematch re-deals a new pair.
+timeout at 5:00 → most hops wins / draw; rematch re-deals a new pair.
+
+Departures:
+- **Host leaves mid-race** (`countdown`/`racing`, explicit or disconnect) → the room closes
+  immediately for everyone (`roomClosed {reason: 'host_left'}`), no grace period.
+- **Guest leaves/disconnects mid-race** → the race keeps running; after the 30s grace the host
+  wins by forfeit, and if the guest reconnects in time the race resumes.
+- **Host leaves in the lobby** → the remaining player is promoted to host so the race can start.
 
 ### Render free-tier truths
 

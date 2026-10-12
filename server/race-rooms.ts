@@ -36,8 +36,15 @@ export type FinishedMessage = {
   path: PersonId[] | null;
 };
 export type ErrorMessage = { type: 'error'; code: string };
+export type RoomClosedMessage = { type: 'roomClosed'; reason: string };
 
-export type ServerMessage = RoomStateMessage | CountdownMessage | ProgressMessage | FinishedMessage | ErrorMessage;
+export type ServerMessage =
+  | RoomStateMessage
+  | CountdownMessage
+  | ProgressMessage
+  | FinishedMessage
+  | ErrorMessage
+  | RoomClosedMessage;
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 4;
@@ -114,6 +121,7 @@ export class RaceRoom {
   private countdownTimer: TimerHandle | null = null;
   private raceTimer: TimerHandle | null = null;
   private raceEndsAt: number | null = null;
+  private closed = false;
 
   private readonly dealer: RaceDealer;
   private readonly timers: RaceTimers;
@@ -213,6 +221,7 @@ export class RaceRoom {
       if (player.socket === socket) {
         if (this.phase === 'lobby') {
           this.players.delete(playerId);
+          this.ensureHost();
         } else {
           player.connected = false;
           player.socket = null;
@@ -224,7 +233,50 @@ export class RaceRoom {
   }
 
   removePlayer(playerId: string): boolean {
-    return this.players.delete(playerId);
+    const removed = this.players.delete(playerId);
+    if (removed) {
+      this.ensureHost();
+    }
+    return removed;
+  }
+
+  markDisconnected(playerId: string): boolean {
+    const player = this.players.get(playerId);
+    if (!player) {
+      return false;
+    }
+    player.connected = false;
+    player.socket = null;
+    return true;
+  }
+
+  ensureHost(): void {
+    if (this.hostId) {
+      return;
+    }
+    const first = this.players.values().next().value;
+    if (first) {
+      first.isHost = true;
+    }
+  }
+
+  get isClosed(): boolean {
+    return this.closed;
+  }
+
+  close(reason: string): void {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+    this.clearTimers();
+    this.broadcast({ type: 'roomClosed', reason });
+    for (const player of this.players.values()) {
+      const socket = player.socket;
+      player.socket = null;
+      player.connected = false;
+      socket?.close();
+    }
   }
 
   isHost(playerId: string): boolean {

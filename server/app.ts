@@ -64,6 +64,17 @@ export const createApp = (options: CreateAppOptions = {}) => {
     }
   };
 
+  const clearRoomGrace = (code: string) => {
+    const roomTimers = graceTimers.get(code);
+    if (!roomTimers) {
+      return;
+    }
+    for (const handle of roomTimers.values()) {
+      clearTimeout(handle);
+    }
+    graceTimers.delete(code);
+  };
+
   app.set('trust proxy', true);
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin']);
@@ -136,15 +147,31 @@ export const createApp = (options: CreateAppOptions = {}) => {
   };
 
   const handleLeave = (room: RaceRoom, socket: WebSocket, playerId: string) => {
-    const wasActive = room.phase === 'countdown' || room.phase === 'racing';
-    const other = room.otherPlayerId(playerId);
+    const wasHost = room.isHost(playerId);
+    const active = room.phase === 'countdown' || room.phase === 'racing';
+
+    if (active && wasHost) {
+      clearRoomGrace(room.code);
+      room.close('host_left');
+      roomStore.remove(room.code);
+      socket.close();
+      return;
+    }
+
+    if (active) {
+      room.markDisconnected(playerId);
+      room.broadcastRoomState();
+      scheduleGrace(room, playerId);
+      socket.close();
+      return;
+    }
+
     room.removePlayer(playerId);
     clearGrace(room.code, playerId);
-    if (wasActive && other) {
-      room.finish(other, 'forfeit', null);
-    } else if (room.playerCount === 0) {
+    if (room.playerCount === 0) {
       roomStore.remove(room.code);
     } else {
+      room.ensureHost();
       room.broadcastRoomState();
     }
     socket.close();
@@ -226,6 +253,7 @@ export const createApp = (options: CreateAppOptions = {}) => {
 
     socket.on('close', () => {
       const playerId = room.playerIdBySocket(socket);
+      const wasHost = playerId ? room.isHost(playerId) : false;
       if (!room.leaveBySocket(socket)) {
         return;
       }
@@ -235,6 +263,12 @@ export const createApp = (options: CreateAppOptions = {}) => {
         } else {
           room.broadcastRoomState();
         }
+        return;
+      }
+      if (wasHost && (room.phase === 'countdown' || room.phase === 'racing')) {
+        clearRoomGrace(room.code);
+        room.close('host_left');
+        roomStore.remove(room.code);
         return;
       }
       room.broadcastRoomState();
