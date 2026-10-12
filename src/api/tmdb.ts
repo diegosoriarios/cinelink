@@ -8,6 +8,9 @@ const TMDB_PROXY_URL = process.env.EXPO_PUBLIC_TMDB_PROXY_URL;
 const CREDITS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CREDITS_CACHE_PREFIX = 'tmdb:credits:';
 const MAX_RETRIES = 4;
+const REQUEST_TIMEOUT_MS = 25_000;
+
+const isAbortError = (error: unknown) => (error as { name?: string } | null)?.name === 'AbortError';
 
 type CachedValue<T> = {
   expiresAt: number;
@@ -117,7 +120,24 @@ const setCached = async <T>(key: string, value: T) => {
 const request = async <T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> => {
   let delay = 300;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
-    const response = await fetch(buildUrl(path, params));
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(buildUrl(path, params), { signal: controller.signal });
+    } catch (error) {
+      if (!isAbortError(error)) {
+        throw error;
+      }
+      if (attempt === MAX_RETRIES) {
+        break;
+      }
+      await sleep(delay);
+      delay *= 2;
+      continue;
+    } finally {
+      clearTimeout(timer);
+    }
     if (response.ok) {
       return (await response.json()) as T;
     }
