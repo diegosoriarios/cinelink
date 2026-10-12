@@ -220,6 +220,10 @@ Triggers:
 The workflow overrides `expo.version` / `android.versionCode` from the tag and run
 number, builds `assembleRelease`, and uploads `cinelink-<tag>.apk`.
 
+SDK setup uses `android-actions/setup-android@v4.0.4`. Do not downgrade to `@v3`
+(≤ v3.2.2): it tries to install the deprecated `tools` package, which Google
+removed, so the step fails with `Failed to find package 'tools'`.
+
 Required repository variables (Settings → Secrets and variables → Actions → Variables):
 
 - `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server-10b9.onrender.com`)
