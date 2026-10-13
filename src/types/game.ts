@@ -1,5 +1,7 @@
 export type PersonId = number;
 
+export type MediaType = 'movie' | 'tv';
+
 export type GameMode = 'daily' | 'explorer' | 'speedrun';
 
 export type PuzzleEntry = {
@@ -14,8 +16,9 @@ export type PuzzleEntry = {
 export type Hop = {
   fromPersonId: PersonId;
   toPersonId: PersonId;
-  sharedMovieId: number;
-  sharedMovieTitle: string;
+  sharedMediaType: MediaType;
+  sharedMediaId: number;
+  sharedMediaTitle: string;
 };
 
 export type PuzzleHistoryEntry = {
@@ -36,6 +39,7 @@ export type PersonLite = {
 export type MovieLite = {
   id: number;
   title: string;
+  mediaType: MediaType;
   release_date?: string;
   poster_path?: string | null;
 };

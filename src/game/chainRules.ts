@@ -1,11 +1,11 @@
 import type { PersonId } from '../types/game';
 
-export const findSharedMovieIds = (moviesA: Iterable<number>, moviesB: Iterable<number>): Set<number> => {
-  const setB = moviesB instanceof Set ? moviesB : new Set(moviesB);
-  const shared = new Set<number>();
-  for (const movieId of moviesA) {
-    if (setB.has(movieId)) {
-      shared.add(movieId);
+export const findSharedMediaKeys = (mediaA: Iterable<string>, mediaB: Iterable<string>): Set<string> => {
+  const setB = mediaB instanceof Set ? mediaB : new Set(mediaB);
+  const shared = new Set<string>();
+  for (const key of mediaA) {
+    if (setB.has(key)) {
+      shared.add(key);
     }
   }
   return shared;
@@ -18,14 +18,14 @@ export type ChainValidation = {
 
 export const MIN_CHAIN_LENGTH = 2;
 
-export const validateChain = (creditsByPerson: Map<PersonId, Set<number>>, path: PersonId[]): ChainValidation => {
+export const validateChain = (creditsByPerson: Map<PersonId, Set<string>>, path: PersonId[]): ChainValidation => {
   if (path.length < MIN_CHAIN_LENGTH) {
     return { valid: false, invalidIndex: 0 };
   }
   for (let i = 0; i < path.length - 1; i += 1) {
-    const moviesA = creditsByPerson.get(path[i]);
-    const moviesB = creditsByPerson.get(path[i + 1]);
-    if (!moviesA || !moviesB || findSharedMovieIds(moviesA, moviesB).size === 0) {
+    const mediaA = creditsByPerson.get(path[i]);
+    const mediaB = creditsByPerson.get(path[i + 1]);
+    if (!mediaA || !mediaB || findSharedMediaKeys(mediaA, mediaB).size === 0) {
       return { valid: false, invalidIndex: i + 1 };
     }
   }

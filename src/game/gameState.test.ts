@@ -14,7 +14,7 @@ const DAILY_DATE = '2026-05-05';
 const NEXT_DATE = '2026-05-06';
 const LOSS_DATE = '2026-05-07';
 
-const movieFor = (id: number) => ({ id: 9000 + id, title: `Movie ${id}` });
+const movieFor = (id: number) => ({ id: 9000 + id, title: `Movie ${id}`, mediaType: 'movie' as const });
 
 const puzzleList = puzzles as PuzzleEntry[];
 const puzzleOf = (date: string) => puzzleList.find((p) => p.date === date)!;
@@ -158,13 +158,14 @@ describe('addHop', () => {
     useDate(DAILY_DATE);
     await state().initMode('daily');
 
-    const result = await state().addHop(201, { id: 4444, title: 'Chosen Feature' });
+    const result = await state().addHop(201, { id: 4444, title: 'Chosen Feature', mediaType: 'movie' });
     expect(result.ok).toBe(true);
     expect(result.hop).toMatchObject({
       fromPersonId: puzzleOf(DAILY_DATE).startId,
       toPersonId: 201,
-      sharedMovieId: 4444,
-      sharedMovieTitle: 'Chosen Feature'
+      sharedMediaType: 'movie',
+      sharedMediaId: 4444,
+      sharedMediaTitle: 'Chosen Feature'
     });
     expect(state().path).toEqual([puzzleOf(DAILY_DATE).startId, 201]);
     expect(state().hasLost).toBe(false);
@@ -176,7 +177,7 @@ describe('addHop', () => {
 
     const result = await state().addHop(201, movieFor(201));
     expect(result.ok).toBe(true);
-    expect(result.hop?.sharedMovieTitle).toBe('Movie 201');
+    expect(result.hop?.sharedMediaTitle).toBe('Movie 201');
     expect(state().path).toEqual([puzzleOf(DAILY_DATE).startId, 201]);
     expect(state().hasWon).toBe(false);
     expect(state().hasLost).toBe(false);

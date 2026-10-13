@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import puzzles from '../data/puzzles.json';
 import pool from '../data/tmdbPool.json';
 import { getPersonDetails } from '../api/tmdb';
-import type { GameMode, Hop, PersonId, PuzzleEntry, PuzzleHistoryEntry } from '../types/game';
+import type { GameMode, Hop, MediaType, PersonId, PuzzleEntry, PuzzleHistoryEntry } from '../types/game';
 
 type PersonPreview = {
   id: number;
@@ -14,6 +14,7 @@ type PersonPreview = {
 type ChosenMovie = {
   id: number;
   title: string;
+  mediaType: MediaType;
 };
 
 type GameStore = {
@@ -189,8 +190,9 @@ export const useGameState = create<GameStore>((set, get) => ({
     const hop: Hop = {
       fromPersonId: previousPersonId,
       toPersonId: nextPersonId,
-      sharedMovieId: movie.id,
-      sharedMovieTitle: movie.title
+      sharedMediaType: movie.mediaType,
+      sharedMediaId: movie.id,
+      sharedMediaTitle: movie.title
     };
 
     const nextPath = [...state.path, nextPersonId];

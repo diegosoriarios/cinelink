@@ -1,7 +1,8 @@
 # CineLink
 
 CineLink is a movie connection game inspired by six-degrees style gameplay.
-Players connect a **start** person to a **target** person through shared movie credits (actors/directors).
+Players connect a **start** person to a **target** person through shared movie & TV credits (actors, directors, creators)
+.
 
 This project is built with **Expo + React Native + Expo Router + Zustand** and supports **iOS, Android, and Web**.
 
@@ -11,7 +12,7 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - Explorer mode (random pair, unlimited hops)
 - Speed Run mode (random pair with running timer)
 - TMDB integration with retries, cache, and persistence
-- Path validation engine using shared movie credits
+- Path validation engine using shared movie & TV credits
 - Stats and streak tracking persisted in AsyncStorage
 - Shareable emoji result strings
 - Web export + Vercel deployment config
@@ -128,7 +129,8 @@ For local development, just set `EXPO_PUBLIC_TMDB_API_KEY` in `.env` (copy
 ### API functions
 
 - `searchPerson(query)`
-- `getPersonCredits(personId)`
+- `getPersonCredits(personId)` — combined movie + TV credits (`/person/{id}/combined_credits`)
+- `getTitleCredits(mediaType, id)` — cast + creators (TV) / directors (movie)
 - `getMovieCredits(movieId)`
 - `getPersonDetails(personId)`
 - `getImageUrl(path)`
@@ -150,10 +152,10 @@ For local development, just set `EXPO_PUBLIC_TMDB_API_KEY` in `.env` (copy
 - `getSharedMovies(personIdA, personIdB)`
   - intersection of movie IDs in both people’s credits
 - `isValidHop(personIdA, personIdB)`
-  - true if at least one shared movie exists
+  - true if at least one shared title exists
 - `buildPath(hops)`
   - validates full path end-to-end
-  - returns validity + per-hop shared movies
+  - returns validity + per-hop shared titles
 
 ## Game State (`src/game/gameState.ts`)
 
@@ -184,7 +186,7 @@ Persistence keys:
 - Horizontal path timeline (person → movie → person)
 - Search input with TMDB dropdown + photos
 - Hop validation on person selection
-- Valid-hop confirmation message with shared movie title
+- Valid-hop confirmation message with the shared title
 - Invalid-hop error message
 - Win panel with confetti and share
 - Daily lose panel with shortest-path placeholder display
@@ -329,7 +331,9 @@ Behavior:
 - `GET /healthz` — health check (used by Render)
 - `GET /tmdb/*` — proxies to `https://api.themoviedb.org/3/*`
 - Injects `TMDB_API_KEY` from env
-- Path allowlist + per-IP room-creation rate limit
+- Path allowlist (`/person/:id`, `/person/:id/combined_credits`, `/person/:id/movie_credits`,
+  `/movie/:id/credits`, `/tv/:id`, `/tv/:id/credits`, `/search/person`) + per-IP
+  room-creation rate limit
 - `/race/*` — room REST + WebSocket (see `docs/plans/race-server.md`)
 
 The `/tmdb/*` proxy logic lives in `server/tmdb-core.ts` (dependency-free) and is shared
@@ -360,7 +364,7 @@ Race rooms (`/race/*`):
 - Server → client: `roomState` (full sync incl. `start`/`target`), `countdown`, `progress`,
   `finished`, `error`
 - Pairs are dealt at random from `src/data/tmdbPool.json` at each `start`/rematch
-- Claims are validated server-side hop-by-hop against TMDB `movie_credits` (24h cache);
+- Claims are validated server-side hop-by-hop against TMDB `combined_credits` (24h cache);
   the first valid claim wins, timeout awards the fewest hops (tie = draw),
   disconnect forfeits after a 30s grace window
 - CORS is applied app-wide so the web build can reach `/race/*`

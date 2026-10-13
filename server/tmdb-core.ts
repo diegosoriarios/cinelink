@@ -1,6 +1,14 @@
 export const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
-const ALLOWED_PATHS = [/^\/person\/\d+$/, /^\/person\/\d+\/movie_credits$/, /^\/movie\/\d+\/credits$/, /^\/search\/person$/];
+const ALLOWED_PATHS = [
+  /^\/person\/\d+$/,
+  /^\/person\/\d+\/combined_credits$/,
+  /^\/person\/\d+\/movie_credits$/,
+  /^\/movie\/\d+\/credits$/,
+  /^\/tv\/\d+$/,
+  /^\/tv\/\d+\/credits$/,
+  /^\/search\/person$/
+];
 
 export const isAllowedTmdbPath = (path: string) => ALLOWED_PATHS.some((pattern) => pattern.test(path));
 

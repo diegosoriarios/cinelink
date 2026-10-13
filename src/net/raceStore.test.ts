@@ -38,7 +38,7 @@ describe('reduceRaceMessage', () => {
       targetPerson: person(9, 'Target'),
       raceStartedAt: 1000,
       path: [1, 2],
-      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMovieId: 10, sharedMovieTitle: 'Movie' }]
+      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMediaType: 'movie' as const, sharedMediaId: 10, sharedMediaTitle: 'Movie' }]
     };
 
     const next = reduceRaceMessage(base, {
@@ -114,20 +114,20 @@ describe('useRaceStore actions', () => {
   it('appends a hop and records the person name while racing', () => {
     useRaceStore.setState({ ...initialRaceState, selfId: 'me', phase: 'racing', path: [1] });
 
-    const result = useRaceStore.getState().addHop(person(2, 'Second'), { id: 10, title: 'Shared Movie' });
+    const result = useRaceStore.getState().addHop(person(2, 'Second'), { id: 10, title: 'Shared Movie', mediaType: 'movie' });
 
     expect(result.ok).toBe(true);
     const state = useRaceStore.getState();
     expect(state.path).toEqual([1, 2]);
     expect(state.hops).toEqual([
-      { fromPersonId: 1, toPersonId: 2, sharedMovieId: 10, sharedMovieTitle: 'Shared Movie' }
+      { fromPersonId: 1, toPersonId: 2, sharedMediaType: 'movie' as const, sharedMediaId: 10, sharedMediaTitle: 'Shared Movie' }
     ]);
     expect(state.personMap[2]?.name).toBe('Second');
   });
 
   it('refuses hops outside of the racing phase', () => {
     useRaceStore.setState({ ...initialRaceState, selfId: 'me', phase: 'lobby', path: [1] });
-    const result = useRaceStore.getState().addHop(person(2, 'Second'), { id: 10, title: 'Shared Movie' });
+    const result = useRaceStore.getState().addHop(person(2, 'Second'), { id: 10, title: 'Shared Movie', mediaType: 'movie' });
     expect(result.ok).toBe(false);
     expect(useRaceStore.getState().path).toEqual([1]);
   });
@@ -138,7 +138,7 @@ describe('useRaceStore actions', () => {
       selfId: 'me',
       phase: 'racing',
       path: [1, 2],
-      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMovieId: 10, sharedMovieTitle: 'Shared Movie' }]
+      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMediaType: 'movie' as const, sharedMediaId: 10, sharedMediaTitle: 'Shared Movie' }]
     });
 
     useRaceStore.getState().undoHop();
@@ -176,7 +176,7 @@ describe('useRaceStore actions', () => {
       selfId: 'me',
       phase: 'finished',
       path: [1, 2],
-      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMovieId: 10, sharedMovieTitle: 'Shared Movie' }],
+      hops: [{ fromPersonId: 1, toPersonId: 2, sharedMediaType: 'movie' as const, sharedMediaId: 10, sharedMediaTitle: 'Shared Movie' }],
       result: { winnerId: 'me', reason: 'claim', path: [1, 2] }
     });
 

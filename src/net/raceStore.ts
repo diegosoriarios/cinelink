@@ -258,8 +258,9 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
     const hop: Hop = {
       fromPersonId: previous,
       toPersonId: person.id,
-      sharedMovieId: movie.id,
-      sharedMovieTitle: movie.title
+      sharedMediaType: movie.mediaType,
+      sharedMediaId: movie.id,
+      sharedMediaTitle: movie.title
     };
     const nextPath = [...path, person.id];
     const nextHops = [...hops, hop];

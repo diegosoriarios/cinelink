@@ -340,7 +340,7 @@ export const RaceScreen = () => {
           <View style={styles.node}><Text style={styles.nodeText}>{startPerson.name}</Text></View>
           {hops.map((hop) => (
             <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}`}>
-              <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMovieTitle}</Text></View>
+              <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMediaTitle}</Text></View>
               <View style={styles.node}>
                 <Text style={styles.nodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text>
               </View>

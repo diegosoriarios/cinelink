@@ -123,6 +123,21 @@ describe('server app', () => {
       expect(response.headers.get('access-control-allow-origin')).toBe('*');
     });
 
+    it('forwards the movie + TV endpoints used by the app', async () => {
+      process.env.TMDB_API_KEY = 'test-key';
+      const upstream = vi.fn(async (_input: string | URL) => new Response('{}', { status: 200 }));
+      vi.stubGlobal('fetch', upstream);
+
+      await realFetch(`${baseUrl}/tmdb/person/123/combined_credits`);
+      await realFetch(`${baseUrl}/tmdb/tv/456`);
+      await realFetch(`${baseUrl}/tmdb/tv/456/credits`);
+
+      expect(upstream).toHaveBeenCalledTimes(3);
+      expect((new URL(upstream.mock.calls[0][0] as string)).pathname).toBe('/3/person/123/combined_credits');
+      expect((new URL(upstream.mock.calls[1][0] as string)).pathname).toBe('/3/tv/456');
+      expect((new URL(upstream.mock.calls[2][0] as string)).pathname).toBe('/3/tv/456/credits');
+    });
+
     it('strips a client-provided api_key', async () => {
       process.env.TMDB_API_KEY = 'test-key';
       const upstream = vi.fn(async (_input: string | URL) => new Response('{}', { status: 200 }));
@@ -246,7 +261,7 @@ describe('server app', () => {
       target: { id: 9, name: 'Target', profile_path: null }
     });
     const getCredits = async (personId: number) => {
-      const credits: Record<number, number[]> = { 1: [100], 2: [100, 200], 9: [200] };
+      const credits: Record<number, string[]> = { 1: ['movie:100'], 2: ['movie:100', 'movie:200'], 9: ['movie:200'] };
       return new Set(credits[personId] ?? []);
     };
 

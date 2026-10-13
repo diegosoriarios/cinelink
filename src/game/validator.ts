@@ -1,51 +1,48 @@
 import { getPersonCredits } from '../api/tmdb';
+import { mediaKey } from './media';
 import type { MovieLite, PersonId } from '../types/game';
 
-const movieSort = (a: MovieLite, b: MovieLite) => {
+const titleSort = (a: MovieLite, b: MovieLite) => {
   const aDate = a.release_date ? Date.parse(a.release_date) : 0;
   const bDate = b.release_date ? Date.parse(b.release_date) : 0;
   return bDate - aDate;
 };
 
-const normalizePersonMovieIds = async (personId: PersonId) => {
+const normalizePersonTitles = async (personId: PersonId) => {
   const credits = await getPersonCredits(personId);
-  const byId = new Map<number, MovieLite>();
+  const byKey = new Map<string, MovieLite>();
 
-  for (const movie of credits.cast) {
-    byId.set(movie.id, {
-      id: movie.id,
-      title: movie.title,
-      release_date: movie.release_date,
-      poster_path: movie.poster_path ?? null
-    });
-  }
-
-  for (const movie of credits.crew) {
-    if (!byId.has(movie.id)) {
-      byId.set(movie.id, {
-        id: movie.id,
-        title: movie.title,
-        release_date: movie.release_date,
-        poster_path: movie.poster_path ?? null
+  const add = (credit: { id: number; title: string; media_type: MovieLite['mediaType']; release_date?: string; poster_path?: string | null }) => {
+    const key = mediaKey(credit.media_type, credit.id);
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        id: credit.id,
+        title: credit.title,
+        mediaType: credit.media_type,
+        release_date: credit.release_date,
+        poster_path: credit.poster_path ?? null
       });
     }
-  }
+  };
 
-  return byId;
+  credits.cast.forEach(add);
+  credits.crew.forEach(add);
+
+  return byKey;
 };
 
 export const getSharedMovies = async (personIdA: PersonId, personIdB: PersonId): Promise<MovieLite[]> => {
   if (personIdA === personIdB) {
     return [];
   }
-  const [aMovies, bMovies] = await Promise.all([normalizePersonMovieIds(personIdA), normalizePersonMovieIds(personIdB)]);
+  const [aTitles, bTitles] = await Promise.all([normalizePersonTitles(personIdA), normalizePersonTitles(personIdB)]);
   const shared: MovieLite[] = [];
-  for (const [movieId, movie] of aMovies.entries()) {
-    if (bMovies.has(movieId)) {
-      shared.push(movie);
+  for (const [key, title] of aTitles.entries()) {
+    if (bTitles.has(key)) {
+      shared.push(title);
     }
   }
-  return shared.sort(movieSort);
+  return shared.sort(titleSort);
 };
 
 export const isValidHop = async (personIdA: PersonId, personIdB: PersonId): Promise<boolean> => {

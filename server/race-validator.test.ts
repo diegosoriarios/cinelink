@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCreditsCache, validateRaceClaim, type CreditsFetcher } from './race-validator';
 
-const creditsFrom = (map: Record<number, number[]>): CreditsFetcher => async (personId) => new Set(map[personId] ?? []);
+const creditsFrom = (map: Record<number, string[]>): CreditsFetcher => async (personId) => new Set(map[personId] ?? []);
 
-const VALID_CREDITS = { 1: [100], 2: [100, 200], 9: [200] };
+const VALID_CREDITS = { 1: ['movie:100'], 2: ['movie:100', 'movie:200'], 9: ['movie:200'] };
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -54,22 +54,25 @@ describe('validateRaceClaim', () => {
 });
 
 describe('createCreditsCache', () => {
-  it('fetches once, injects the api key and caches movie ids', async () => {
+  it('fetches once, injects the api key and caches media keys', async () => {
     process.env.TMDB_API_KEY = 'test-key';
     const fetchImpl = vi.fn(
       async (_input: string | URL) =>
-        new Response(JSON.stringify({ cast: [{ id: 100 }], crew: [{ id: 200 }, { id: 100 }] }), { status: 200 })
+        new Response(
+          JSON.stringify({ cast: [{ id: 100, media_type: 'movie' }], crew: [{ id: 200, media_type: 'tv' }, { id: 100, media_type: 'movie' }] }),
+          { status: 200 }
+        )
     );
     const cache = createCreditsCache({ fetchImpl: fetchImpl as unknown as typeof fetch, ttlMs: 10_000 });
 
     const first = await cache.getCredits(42);
     const second = await cache.getCredits(42);
 
-    expect([...first].sort((a, b) => a - b)).toEqual([100, 200]);
+    expect([...first].sort()).toEqual(['movie:100', 'tv:200']);
     expect(second).toBe(first);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     const url = new URL(String(fetchImpl.mock.calls[0][0]));
-    expect(url.pathname).toBe('/3/person/42/movie_credits');
+    expect(url.pathname).toBe('/3/person/42/combined_credits');
     expect(url.searchParams.get('api_key')).toBe('test-key');
   });
 

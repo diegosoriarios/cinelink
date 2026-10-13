@@ -1,5 +1,6 @@
 import { getPersonCredits } from '../api/tmdb';
 import { buildPath, getSharedMovies, isValidHop } from './validator';
+import type { MediaType } from '../types/game';
 
 jest.mock('../api/tmdb', () => ({
   getPersonCredits: jest.fn()
@@ -7,9 +8,16 @@ jest.mock('../api/tmdb', () => ({
 
 const mockedGetPersonCredits = getPersonCredits as jest.MockedFunction<typeof getPersonCredits>;
 
-const creditEntry = (id: number, title: string, release_date?: string) => ({ id, title, release_date });
+type CreditEntry = { id: number; title: string; release_date?: string; media_type: MediaType };
 
-const creditsByPerson: Record<number, { cast: ReturnType<typeof creditEntry>[]; crew: ReturnType<typeof creditEntry>[] }> = {
+const creditEntry = (id: number, title: string, release_date?: string, media_type: MediaType = 'movie'): CreditEntry => ({
+  id,
+  title,
+  release_date,
+  media_type
+});
+
+const creditsByPerson: Record<number, { cast: CreditEntry[]; crew: CreditEntry[] }> = {
   1: {
     cast: [creditEntry(101, 'Old Movie', '2000-01-01'), creditEntry(102, 'New Movie', '2020-05-01')],
     crew: []
@@ -57,6 +65,11 @@ describe('getSharedMovies', () => {
 
   it('returns empty list when no shared movie exists', async () => {
     await expect(getSharedMovies(1, 3)).resolves.toEqual([]);
+  });
+
+  it('does not match a movie and a TV show that share the same id', async () => {
+    creditsByPerson[5] = { cast: [creditEntry(101, 'A Show', undefined, 'tv')], crew: [] };
+    await expect(getSharedMovies(1, 5)).resolves.toEqual([]);
   });
 });
 

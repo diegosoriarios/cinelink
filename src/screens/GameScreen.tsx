@@ -183,7 +183,7 @@ export const GameScreen = ({ mode }: Props) => {
   }, [targetPerson?.id]);
 
   const onHop = async (person: PersonLite, movie: MovieLite) => {
-    const result = await addHop(person.id, { id: movie.id, title: movie.title });
+    const result = await addHop(person.id, { id: movie.id, title: movie.title, mediaType: movie.mediaType });
     if (!result.ok) {
       setMessage(result.reason ?? 'Invalid hop');
       return false;
@@ -311,9 +311,9 @@ export const GameScreen = ({ mode }: Props) => {
   const hintBox =
     activeHints && (revealedHints.length > 0 || hintButtonVisible) ? (
       <View style={styles.hintBox}>
-        <Text style={styles.hintTitle}>Need a hint? Movies the target is known for:</Text>
+        <Text style={styles.hintTitle}>Need a hint? Titles the target is known for:</Text>
         {revealedHints.map((movie, idx) => (
-          <Text key={`hint-${movie.id}`} style={styles.hintText}>💡 Hint {idx + 1}: {movie.title}</Text>
+          <Text key={`hint-${movie.mediaType}-${movie.id}`} style={styles.hintText}>💡 Hint {idx + 1}: {movie.title}</Text>
         ))}
         {hintButtonVisible ? (
           <Pressable style={styles.hintButton} onPress={() => setHintsShown((count) => Math.min(activeHints.length, count + 1))}>
@@ -398,7 +398,7 @@ export const GameScreen = ({ mode }: Props) => {
               {hops.map((hop, idx) => (
                 <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}-${idx}`}>
                   <View style={styles.timelineEdge}>
-                    <Text style={styles.timelineEdgeText}>{hop.sharedMovieTitle}</Text>
+                    <Text style={styles.timelineEdgeText}>{hop.sharedMediaTitle}</Text>
                   </View>
                   <View style={styles.timelineNode}>
                     <Text style={styles.timelineNodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text>
@@ -448,7 +448,7 @@ export const GameScreen = ({ mode }: Props) => {
           <View style={styles.node}><Text style={styles.nodeText}>{startPerson.name}</Text></View>
           {hops.map((hop, idx) => (
             <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}-${idx}`}>
-              <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMovieTitle}</Text></View>
+              <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMediaTitle}</Text></View>
               <View style={styles.node}><Text style={styles.nodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text></View>
             </React.Fragment>
           ))}

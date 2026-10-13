@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { mediaKey } from '../game/media';
+import type { MediaType, PersonLite } from '../types/game';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
@@ -8,7 +10,7 @@ const API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 const TMDB_PROXY_URL = process.env.EXPO_PUBLIC_TMDB_PROXY_URL;
 
 const CREDITS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const CREDITS_CACHE_PREFIX = 'tmdb:credits:';
+const CREDITS_CACHE_PREFIX = 'tmdb:credits:v2:';
 const MAX_RETRIES = 4;
 const REQUEST_TIMEOUT_MS = 25_000;
 
@@ -26,18 +28,27 @@ type PersonResult = {
   known_for_department?: string;
 };
 
+export type MediaCredit = {
+  id: number;
+  title: string;
+  media_type: MediaType;
+  release_date?: string;
+  poster_path?: string | null;
+  popularity?: number;
+  job?: string;
+  department?: string;
+};
+
 export type PersonCreditsResponse = {
   id: number;
-  cast: { id: number; title: string; release_date?: string; poster_path?: string | null; popularity?: number }[];
-  crew: {
-    id: number;
-    title: string;
-    job: string;
-    department: string;
-    release_date?: string;
-    poster_path?: string | null;
-    popularity?: number;
-  }[];
+  cast: MediaCredit[];
+  crew: MediaCredit[];
+};
+
+export type TitleCredits = {
+  mediaType: MediaType;
+  creators: PersonLite[];
+  cast: PersonLite[];
 };
 
 export type MovieCreditsResponse = {
@@ -51,6 +62,36 @@ export type MovieCreditsResponse = {
     profile_path: string | null;
     known_for_department?: string;
   }[];
+};
+
+type RawMediaCredit = {
+  id?: number;
+  title?: string;
+  name?: string;
+  media_type?: MediaType;
+  release_date?: string;
+  first_air_date?: string;
+  poster_path?: string | null;
+  popularity?: number;
+  job?: string;
+  department?: string;
+};
+
+type CombinedCreditsResponse = {
+  id: number;
+  cast?: RawMediaCredit[];
+  crew?: RawMediaCredit[];
+};
+
+type TvCreditsResponse = {
+  id: number;
+  cast: { id: number; name: string; profile_path: string | null; known_for_department?: string }[];
+  crew: { id: number; name: string; profile_path: string | null; known_for_department?: string }[];
+};
+
+type TvDetailsResponse = {
+  id: number;
+  created_by?: { id: number; name: string; profile_path: string | null }[];
 };
 
 type PersonDetailsResponse = {
@@ -118,7 +159,7 @@ const buildUrl = (path: string, params: Record<string, string | number | undefin
   return url.toString();
 };
 
-const getCacheKey = (type: 'person' | 'movie', id: number) => `${CREDITS_CACHE_PREFIX}${type}:${id}`;
+const getCacheKey = (type: 'person' | 'movie' | 'tv', id: number) => `${CREDITS_CACHE_PREFIX}${type}:${id}`;
 
 const getCached = async <T>(key: string): Promise<T | null> => {
   const fromMemory = memoryCache.get(key);
@@ -217,17 +258,61 @@ export const searchPerson = async (query: string) => {
   return data.results.filter((person) => !!person.name).slice(0, 12);
 };
 
+const normalizeMediaCredit = (raw: RawMediaCredit): MediaCredit | null => {
+  if (typeof raw?.id !== 'number' || !raw.id) {
+    return null;
+  }
+  const title = raw.title ?? raw.name;
+  if (!title) {
+    return null;
+  }
+  return {
+    id: raw.id,
+    title,
+    media_type: raw.media_type ?? 'movie',
+    release_date: raw.release_date ?? raw.first_air_date,
+    poster_path: raw.poster_path ?? null,
+    popularity: raw.popularity,
+    job: raw.job,
+    department: raw.department
+  };
+};
+
+const uniqueMediaCredits = (items: RawMediaCredit[]): MediaCredit[] => {
+  const seen = new Set<string>();
+  const out: MediaCredit[] = [];
+  for (const item of items) {
+    const normalized = normalizeMediaCredit(item);
+    if (!normalized) {
+      continue;
+    }
+    const key = mediaKey(normalized.media_type, normalized.id);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    out.push(normalized);
+  }
+  return out;
+};
+
+const toPersonLite = (person: { id: number; name: string; profile_path: string | null }): PersonLite => ({
+  id: person.id,
+  name: person.name,
+  profile_path: person.profile_path
+});
+
 export const getPersonCredits = async (personId: number) => {
   const cacheKey = getCacheKey('person', personId);
   const cached = await getCached<PersonCreditsResponse>(cacheKey);
   if (cached) {
     return cached;
   }
-  const data = await request<PersonCreditsResponse>(`/person/${personId}/movie_credits`);
+  const data = await request<CombinedCreditsResponse>(`/person/${personId}/combined_credits`);
   const normalized: PersonCreditsResponse = {
-    ...data,
-    cast: uniqueById(data.cast),
-    crew: uniqueById(data.crew)
+    id: data.id,
+    cast: uniqueMediaCredits(data.cast ?? []),
+    crew: uniqueMediaCredits(data.crew ?? [])
   };
   await setCached(cacheKey, normalized);
   return normalized;
@@ -247,6 +332,39 @@ export const getMovieCredits = async (movieId: number) => {
   };
   await setCached(cacheKey, normalized);
   return normalized;
+};
+
+const getTvCredits = async (tvId: number): Promise<TitleCredits> => {
+  const cacheKey = getCacheKey('tv', tvId);
+  const cached = await getCached<TitleCredits>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const [details, credits] = await Promise.all([
+    request<TvDetailsResponse>(`/tv/${tvId}`),
+    request<TvCreditsResponse>(`/tv/${tvId}/credits`)
+  ]);
+  const normalized: TitleCredits = {
+    mediaType: 'tv',
+    creators: (details.created_by ?? []).map(toPersonLite),
+    cast: uniqueById(credits.cast).map(toPersonLite)
+  };
+  await setCached(cacheKey, normalized);
+  return normalized;
+};
+
+export const getTitleCredits = async (mediaType: MediaType, id: number): Promise<TitleCredits> => {
+  if (mediaType === 'tv') {
+    return getTvCredits(id);
+  }
+  const credits = await getMovieCredits(id);
+  return {
+    mediaType: 'movie',
+    creators: credits.crew
+      .filter((member) => member.department === 'Directing' && member.job === 'Director')
+      .map(toPersonLite),
+    cast: credits.cast.map(toPersonLite)
+  };
 };
 
 export const getPersonDetails = async (personId: number) => {

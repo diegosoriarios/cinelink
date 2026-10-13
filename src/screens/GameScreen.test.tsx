@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import puzzles from '../data/puzzles.json';
 import pool from '../data/tmdbPool.json';
-import { getMovieCredits, getPersonCredits, getPersonDetails, isTmdbConfigured } from '../api/tmdb';
+import { getTitleCredits, getPersonCredits, getPersonDetails, isTmdbConfigured } from '../api/tmdb';
 import { GameScreen } from '../screens/GameScreen';
 import { useGameState } from '../game/gameState';
 import { useIsWideScreen } from '../hooks/useIsWideScreen';
@@ -11,7 +11,7 @@ jest.mock('../api/tmdb', () => ({
   getImageUrl: jest.fn(() => null),
   getPersonDetails: jest.fn(),
   getPersonCredits: jest.fn(),
-  getMovieCredits: jest.fn(),
+  getTitleCredits: jest.fn(),
   isTmdbConfigured: jest.fn(() => true)
 }));
 
@@ -21,7 +21,7 @@ jest.mock('../hooks/useIsWideScreen', () => ({
 
 const mockedGetPersonDetails = getPersonDetails as jest.MockedFunction<typeof getPersonDetails>;
 const mockedGetPersonCredits = getPersonCredits as jest.MockedFunction<typeof getPersonCredits>;
-const mockedGetMovieCredits = getMovieCredits as jest.MockedFunction<typeof getMovieCredits>;
+const mockedGetTitleCredits = getTitleCredits as jest.Mock;
 const mockedUseIsWideScreen = useIsWideScreen as jest.Mock;
 const mockedIsTmdbConfigured = isTmdbConfigured as jest.Mock;
 
@@ -61,11 +61,22 @@ beforeEach(() => {
   });
   mockedGetPersonCredits.mockImplementation(async (personId: number) => {
     const credits = creditsFor[personId] ?? { cast: [], crew: [] };
-    return { id: personId, cast: credits.cast, crew: credits.crew };
+    return {
+      id: personId,
+      cast: credits.cast.map((credit) => ({ media_type: 'movie' as const, ...credit })),
+      crew: credits.crew.map((credit) => ({ media_type: 'movie' as const, ...credit }))
+    };
   });
-  mockedGetMovieCredits.mockImplementation(async (movieId: number) => {
-    const credits = movieCreditsFor[movieId] ?? { cast: [], crew: [] };
-    return { id: movieId, cast: credits.cast, crew: credits.crew };
+  mockedGetTitleCredits.mockImplementation(async (mediaType, id: number) => {
+    const credits = movieCreditsFor[id] ?? { cast: [], crew: [] };
+    const creators = credits.crew
+      .filter((member) => member.department === 'Directing' && member.job === 'Director')
+      .map((member) => ({ id: member.id, name: member.name, profile_path: member.profile_path }));
+    return {
+      mediaType,
+      creators,
+      cast: credits.cast.map((member) => ({ id: member.id, name: member.name, profile_path: member.profile_path }))
+    };
   });
 });
 
@@ -81,7 +92,7 @@ it('renders start and target cards with the movie browser once initialized', asy
   expect(screen.getByText('Start')).toBeOnTheScreen();
   expect(screen.getByText('Target')).toBeOnTheScreen();
   expect(screen.getByText('Current Path')).toBeOnTheScreen();
-  expect(screen.getByText('Select a movie to see its cast and directors')).toBeOnTheScreen();
+  expect(screen.getByText('Select a title to see its credits')).toBeOnTheScreen();
   expect((await screen.findAllByText(puzzle.startName)).length).toBeGreaterThanOrEqual(2);
   expect(screen.queryByText('TARGET')).toBeNull();
 });
@@ -193,7 +204,7 @@ it('reveals target hints progressively and hides the button when none are left',
   };
   render(<GameScreen mode="daily" />);
 
-  expect(await screen.findByText('Need a hint? Movies the target is known for:')).toBeOnTheScreen();
+  expect(await screen.findByText('Need a hint? Titles the target is known for:')).toBeOnTheScreen();
   expect(screen.queryByText('💡 Hint 1: Justice League')).toBeNull();
 
   fireEvent.press(screen.getByText('💡 Reveal hint (0/3)'));
@@ -256,7 +267,7 @@ it('starts the next explorer round from the win card', async () => {
 
   fireEvent.press(screen.getByText('Next round →'));
 
-  expect(await screen.findByText('Select a movie to see its cast and directors')).toBeOnTheScreen();
+  expect(await screen.findByText('Select a title to see its credits')).toBeOnTheScreen();
   expect(useGameState.getState().hasWon).toBe(false);
   expect(useGameState.getState().explorerWins).toBe(1);
 });
@@ -315,7 +326,7 @@ it('lets the player give up in explorer and start a new pair', async () => {
 
   fireEvent.press(screen.getByText('New pair →'));
 
-  expect(await screen.findByText('Select a movie to see its cast and directors')).toBeOnTheScreen();
+  expect(await screen.findByText('Select a title to see its credits')).toBeOnTheScreen();
   expect(useGameState.getState().hasLost).toBe(false);
   expect(useGameState.getState().path).toHaveLength(1);
 });

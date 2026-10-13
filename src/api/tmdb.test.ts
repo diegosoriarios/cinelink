@@ -191,7 +191,7 @@ describe('credits cache', () => {
     fetchMock.mockResolvedValueOnce(makeResponse({ body: creditsBody }));
     await tmdb.getPersonCredits(42);
 
-    const cachedRaw = store().get('tmdb:credits:person:42');
+    const cachedRaw = store().get('tmdb:credits:v2:person:42');
     expect(cachedRaw).toBeDefined();
     const cached = JSON.parse(cachedRaw!) as { value: { cast: unknown[]; crew: unknown[] }; expiresAt: number };
     expect(cached.value.cast).toHaveLength(2);
@@ -224,10 +224,10 @@ describe('credits cache', () => {
     first.fetchMock.mockResolvedValue(makeResponse({ body: creditsBody }));
     await first.tmdb.getPersonCredits(42);
 
-    const cachedRaw = store().get('tmdb:credits:person:42')!;
+    const cachedRaw = store().get('tmdb:credits:v2:person:42')!;
     const cached = JSON.parse(cachedRaw) as { expiresAt: number };
     cached.expiresAt = Date.now() - 1000;
-    store().set('tmdb:credits:person:42', JSON.stringify(cached));
+    store().set('tmdb:credits:v2:person:42', JSON.stringify(cached));
 
     const second = importTmdb();
     second.fetchMock.mockResolvedValue(makeResponse({ body: creditsBody }));
@@ -271,5 +271,41 @@ describe('resolveProxyBase', () => {
   it('returns null when there is no proxy, key, or same origin', async () => {
     const { tmdb } = importTmdb();
     expect(tmdb.resolveProxyBase(undefined, undefined, null)).toBeNull();
+  });
+});
+
+describe('getTitleCredits', () => {
+  it('derives directors as creators for a movie', async () => {
+    const { tmdb, fetchMock } = importTmdb();
+    fetchMock.mockResolvedValueOnce(
+      makeResponse({
+        body: {
+          id: 7,
+          cast: [{ id: 1, name: 'Actor', profile_path: null }],
+          crew: [{ id: 2, name: 'Director', job: 'Director', department: 'Directing', profile_path: null }]
+        }
+      })
+    );
+
+    const credits = await tmdb.getTitleCredits('movie', 7);
+
+    expect(credits.mediaType).toBe('movie');
+    expect(credits.creators).toEqual([{ id: 2, name: 'Director', profile_path: null }]);
+    expect(credits.cast).toEqual([{ id: 1, name: 'Actor', profile_path: null }]);
+  });
+
+  it('builds TV credits from details (created_by) and credited cast', async () => {
+    const { tmdb, fetchMock } = importTmdb();
+    fetchMock
+      .mockResolvedValueOnce(makeResponse({ body: { id: 5, created_by: [{ id: 900, name: 'Creator', profile_path: '/c.jpg' }] } }))
+      .mockResolvedValueOnce(makeResponse({ body: { id: 5, cast: [{ id: 901, name: 'Star', profile_path: null }], crew: [] } }));
+
+    const credits = await tmdb.getTitleCredits('tv', 5);
+
+    expect(credits.mediaType).toBe('tv');
+    expect(credits.creators).toEqual([{ id: 900, name: 'Creator', profile_path: '/c.jpg' }]);
+    expect(credits.cast).toEqual([{ id: 901, name: 'Star', profile_path: null }]);
+    expect(new URL(fetchMock.mock.calls[0][0] as string).pathname).toBe('/3/tv/5');
+    expect(new URL(fetchMock.mock.calls[1][0] as string).pathname).toBe('/3/tv/5/credits');
   });
 });
