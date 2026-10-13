@@ -10,6 +10,7 @@ import {
   useWindowDimensions
 } from 'react-native';
 import { getImageUrl } from '../api/tmdb';
+import { useHydrated } from '../hooks/useHydrated';
 
 const POSTER_ASPECT = 1.5;
 const GAP = 10;
@@ -82,6 +83,7 @@ const PosterColumn = ({ paths, tileWidth, setHeight, direction, duration, offset
 
 export const PosterBackground = ({ paths, columns, speed = DEFAULT_SPEED_MS }: PosterBackgroundProps) => {
   const { width, height } = useWindowDimensions();
+  const hydrated = useHydrated();
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
@@ -100,7 +102,7 @@ export const PosterBackground = ({ paths, columns, speed = DEFAULT_SPEED_MS }: P
 
   const cleaned = useMemo(() => paths.filter((path): path is string => Boolean(path)), [paths]);
 
-  if (reduceMotion || cleaned.length === 0 || width === 0 || height === 0) {
+  if (!hydrated || reduceMotion || cleaned.length === 0 || width === 0 || height === 0) {
     return null;
   }
 

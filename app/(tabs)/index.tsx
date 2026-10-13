@@ -5,15 +5,21 @@ import puzzles from '../../src/data/puzzles.json';
 import posters from '../../src/data/posters.json';
 import { PosterBackground } from '../../src/components/PosterBackground';
 import { useGameState } from '../../src/game/gameState';
+import { useTodayISO } from '../../src/hooks/useTodayISO';
 import { isRaceConfigured } from '../../src/net/raceClient';
-
-const today = new Date().toISOString().slice(0, 10);
 
 export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
   const streak = useGameState((s) => s.streak);
   const raceAvailable = isRaceConfigured();
-  const puzzle = useMemo(() => (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today), []);
+  const today = useTodayISO();
+  const puzzle = useMemo(
+    () =>
+      today
+        ? (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today)
+        : undefined,
+    [today]
+  );
   const posterPaths = useMemo(() => (posters as { poster_path: string }[]).map((entry) => entry.poster_path), []);
 
   useEffect(() => {
