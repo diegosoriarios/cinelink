@@ -386,16 +386,18 @@ export const GameScreen = ({ mode }: Props) => {
       {hud}
       {hintBox}
 
-      <Text style={styles.sectionTitle}>Current Path</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pathContainer}>
-        <View style={styles.node}><Text style={styles.nodeText}>{startPerson.name}</Text></View>
-        {hops.map((hop, idx) => (
-          <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}-${idx}`}>
-            <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMovieTitle}</Text></View>
-            <View style={styles.node}><Text style={styles.nodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text></View>
-          </React.Fragment>
-        ))}
-      </ScrollView>
+      <View>
+        <Text style={styles.sectionTitle}>Current Path</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pathContainer}>
+          <View style={styles.node}><Text style={styles.nodeText}>{startPerson.name}</Text></View>
+          {hops.map((hop, idx) => (
+            <React.Fragment key={`${hop.fromPersonId}-${hop.toPersonId}-${idx}`}>
+              <View style={styles.edge}><Text style={styles.edgeText}>{hop.sharedMovieTitle}</Text></View>
+              <View style={styles.node}><Text style={styles.nodeText}>{personMap[hop.toPersonId]?.name ?? `#${hop.toPersonId}`}</Text></View>
+            </React.Fragment>
+          ))}
+        </ScrollView>
+      </View>
 
       {message ? <Text style={styles.message}>{message}</Text> : null}
 
