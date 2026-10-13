@@ -10,6 +10,10 @@ const isGameMode = (value: string): value is GameMode => {
   return value === 'daily' || value === 'explorer' || value === 'speedrun';
 };
 
+export function generateStaticParams(): { mode: GameMode }[] {
+  return [{ mode: 'daily' }, { mode: 'explorer' }, { mode: 'speedrun' }];
+}
+
 export default function ModeGameScreen() {
   const params = useLocalSearchParams<{ mode?: string }>();
   const modeParam = typeof params.mode === 'string' ? params.mode : 'daily';
