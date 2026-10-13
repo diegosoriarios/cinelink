@@ -104,14 +104,21 @@ This validates:
 
 ### Environment variables
 
-- `EXPO_PUBLIC_TMDB_API_KEY` — direct TMDB API key
-- `EXPO_PUBLIC_TMDB_PROXY_URL` — optional proxy base URL (recommended for production)
+- `EXPO_PUBLIC_TMDB_API_KEY` — direct TMDB API key. Used on native so single-player
+  calls TMDB directly (no backend), and for local web dev.
+- `EXPO_PUBLIC_TMDB_PROXY_URL` — optional explicit proxy base URL. If set, requests go
+  to `${EXPO_PUBLIC_TMDB_PROXY_URL}/tmdb/...`. On web, when unset, the app falls back to
+  its own origin (`/tmdb/...`), which the bundled Vercel function serves — so the key
+  stays server-side with no extra config. Otherwise requests go directly to TMDB.
 
-If `EXPO_PUBLIC_TMDB_PROXY_URL` is set, requests go to:
+Resolution order (see `resolveProxyBase` in `src/api/tmdb.ts`):
+1. explicit `EXPO_PUBLIC_TMDB_PROXY_URL`
+2. direct `EXPO_PUBLIC_TMDB_API_KEY`
+3. same-origin proxy on web (`window.location.origin`)
 
-- `${EXPO_PUBLIC_TMDB_PROXY_URL}/tmdb/...`
-
-Otherwise requests go directly to TMDB.
+This means **single-player never needs the race backend**: on native it talks to TMDB
+directly, and on web it uses the same-origin Vercel function. Only multiplayer
+(`EXPO_PUBLIC_RACE_URL`) requires the Render server.
 
 ### API functions
 
@@ -224,10 +231,12 @@ SDK setup uses `android-actions/setup-android@v4.0.4`. Do not downgrade to `@v3`
 (≤ v3.2.2): it tries to install the deprecated `tools` package, which Google
 removed, so the step fails with `Failed to find package 'tools'`.
 
-Required repository variables (Settings → Secrets and variables → Actions → Variables):
+Required repository variables/secrets (Settings → Secrets and variables → Actions):
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL (e.g. `https://cinelink-server-10b9.onrender.com`)
-- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host, e.g. `https://cinelink-server-10b9.onrender.com`)
+- `EXPO_PUBLIC_TMDB_API_KEY` (secret) — direct TMDB key baked into the app so native
+  single-player calls TMDB without the backend
+- `EXPO_PUBLIC_RACE_URL` (variable) — deployed server URL for the realtime race API
+  (e.g. `https://cinelink-server-10b9.onrender.com`); multiplayer only
 
 Optional repository variable:
 
@@ -267,14 +276,18 @@ git tag v1.0.0 && git push origin v1.0.0
 - `vercel.json`
   - build command: `npm run export:web`
   - output directory: `dist`
+  - `/tmdb/:path*` rewrite to the bundled `api/tmdb/[...path].ts` function (key stays server-side)
   - SPA rewrite so expo-router handles dynamic routes client-side
 
 Vercel's Git integration deploys on push (no CI token required). Configure these
-build-time environment variables in the Vercel project:
+environment variables in the Vercel project:
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL` — deployed server URL
-- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (same host)
+- `TMDB_API_KEY` — server-side key used by the `api/tmdb/[...path].ts` function
+- `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (multiplayer)
 - `EXPO_PUBLIC_APP_URL` — public site URL (used for OG metadata)
+
+Web single-player needs no TMDB env var: it calls its own origin by default. Set
+`EXPO_PUBLIC_TMDB_PROXY_URL` only if you want web to use the Render proxy instead.
 
 ### Open Graph metadata
 
@@ -310,6 +323,24 @@ Behavior:
 - Path allowlist + per-IP room-creation rate limit
 - `/race/*` — room REST + WebSocket (see `docs/plans/race-server.md`)
 
+The `/tmdb/*` proxy logic lives in `server/tmdb-core.ts` (dependency-free) and is shared
+with the web deployment's Vercel Function at `api/tmdb/[...path].ts`, which is wired up by
+a `vercel.json` rewrite (`/tmdb/:path*` → `/api/tmdb/:path*`). On Vercel, set the
+`TMDB_API_KEY` env var on the project (server-side) so the browser never receives it.
+
+### Single-player without the backend
+
+Daily / explorer / speedrun are fully client-side (bundled data + AsyncStorage). Their
+only network need is TMDB data:
+
+- **Native** — calls TMDB directly with `EXPO_PUBLIC_TMDB_API_KEY`; the Render server is
+  not involved.
+- **Web** — calls the same-origin Vercel Function (`/tmdb/*`), so a Render outage does
+  not affect single-player. Removing the whole key requirement is impossible on web
+  without a server component, because any key shipped to the browser is visible.
+
+Only `EXPO_PUBLIC_RACE_URL` (multiplayer) depends on the Render server.
+
 Race rooms (`/race/*`):
 
 - `POST /race/rooms` → `{ code }`, `GET /race/rooms/:code` → lobby peek
@@ -344,10 +375,14 @@ Production (Render):
   Render Deploy Hook (service → Settings → Deploy Hook) as the
   `RENDER_DEPLOY_HOOK_URL` GitHub Actions secret.
 
-Then configure client app env (Actions variable + Vercel env):
+Then configure the multiplayer client env:
 
-- `EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-server-domain>`
 - `EXPO_PUBLIC_RACE_URL=https://<your-server-domain>`
+
+Single-player does not need this. On native, set `EXPO_PUBLIC_TMDB_API_KEY`; on web,
+single-player uses the bundled Vercel function at the app's own origin by default. Set
+`EXPO_PUBLIC_TMDB_PROXY_URL=https://<your-server-domain>` only if you want web to route
+through this Render server instead of the Vercel function.
 
 ## Development
 

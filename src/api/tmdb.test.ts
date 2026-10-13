@@ -233,3 +233,25 @@ describe('getImageUrl', () => {
     expect(tmdb.getImageUrl('/abc.jpg')).toBe('https://image.tmdb.org/t/p/w185/abc.jpg');
   });
 });
+
+describe('resolveProxyBase', () => {
+  it('prefers an explicit proxy and trims trailing slashes', async () => {
+    const { tmdb } = importTmdb();
+    expect(tmdb.resolveProxyBase('https://proxy.example.com/', 'key', 'https://web.example.com')).toBe('https://proxy.example.com');
+  });
+
+  it('uses the direct key (no proxy) when only a key is configured', async () => {
+    const { tmdb } = importTmdb();
+    expect(tmdb.resolveProxyBase(undefined, 'key', 'https://web.example.com')).toBeNull();
+  });
+
+  it('falls back to the same origin when nothing else is configured', async () => {
+    const { tmdb } = importTmdb();
+    expect(tmdb.resolveProxyBase(undefined, undefined, 'https://web.example.com')).toBe('https://web.example.com');
+  });
+
+  it('returns null when there is no proxy, key, or same origin', async () => {
+    const { tmdb } = importTmdb();
+    expect(tmdb.resolveProxyBase(undefined, undefined, null)).toBeNull();
+  });
+});

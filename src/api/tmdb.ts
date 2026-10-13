@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
@@ -67,8 +68,33 @@ const memoryCache = new Map<string, CachedValue<unknown>>();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Prefer an explicit proxy, then a direct key (native), and finally the web app's
+// own origin so browsers use the bundled same-origin proxy without extra config.
+export const resolveProxyBase = (
+  proxyUrl: string | undefined,
+  apiKey: string | undefined,
+  sameOrigin: string | null
+): string | null => {
+  const explicit = proxyUrl?.replace(/\/$/, '') || null;
+  if (explicit) {
+    return explicit;
+  }
+  if (apiKey) {
+    return null;
+  }
+  return sameOrigin;
+};
+
+const getSameOriginProxy = (): string | null => {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return null;
+  }
+  const origin = window.location?.origin;
+  return origin && origin !== 'null' ? origin : null;
+};
+
 const buildUrl = (path: string, params: Record<string, string | number | undefined> = {}) => {
-  const proxyBase = TMDB_PROXY_URL?.replace(/\/$/, '');
+  const proxyBase = resolveProxyBase(TMDB_PROXY_URL, API_KEY, getSameOriginProxy());
   if (!proxyBase && !API_KEY) {
     throw new Error('Missing EXPO_PUBLIC_TMDB_API_KEY or EXPO_PUBLIC_TMDB_PROXY_URL environment variable');
   }

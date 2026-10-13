@@ -6,6 +6,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/tmdb/:path*",
+      "destination": "/api/tmdb/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

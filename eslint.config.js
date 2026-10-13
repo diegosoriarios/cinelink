@@ -25,5 +25,13 @@ module.exports = [
       }
     }
   },
+  {
+    files: ['api/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
   ...compat.extends('eslint-config-expo')
 ];
