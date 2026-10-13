@@ -5,12 +5,14 @@ import puzzles from '../../src/data/puzzles.json';
 import posters from '../../src/data/posters.json';
 import { PosterBackground } from '../../src/components/PosterBackground';
 import { useGameState } from '../../src/game/gameState';
+import { isRaceConfigured } from '../../src/net/raceClient';
 
 const today = new Date().toISOString().slice(0, 10);
 
 export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
   const streak = useGameState((s) => s.streak);
+  const raceAvailable = isRaceConfigured();
   const puzzle = useMemo(() => (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today), []);
   const posterPaths = useMemo(() => (posters as { poster_path: string }[]).map((entry) => entry.poster_path), []);
 
@@ -43,9 +45,11 @@ export default function HomeScreen() {
           <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Speed Run</Text></Pressable>
         </Link>
 
-        <Link href="/game/race" asChild>
-          <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Race a friend</Text></Pressable>
-        </Link>
+        {raceAvailable ? (
+          <Link href="/game/race" asChild>
+            <Pressable style={styles.secondaryButton}><Text style={styles.secondaryText}>Race a friend</Text></Pressable>
+          </Link>
+        ) : null}
       </View>
     </View>
   );

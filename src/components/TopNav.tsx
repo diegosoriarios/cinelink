@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { isRaceConfigured } from '../net/raceClient';
 
 export const TopNav = () => {
+  const raceAvailable = isRaceConfigured();
   return (
     <View style={styles.nav}>
       <Link href="/" asChild>
@@ -21,11 +23,13 @@ export const TopNav = () => {
             <Text style={styles.linkText}>Stats</Text>
           </Pressable>
         </Link>
-        <Link href="/game/race" asChild>
-          <Pressable hitSlop={8}>
-            <Text style={styles.linkText}>Race</Text>
-          </Pressable>
-        </Link>
+        {raceAvailable ? (
+          <Link href="/game/race" asChild>
+            <Pressable hitSlop={8}>
+              <Text style={styles.linkText}>Race</Text>
+            </Pressable>
+          </Link>
+        ) : null}
       </View>
     </View>
   );
