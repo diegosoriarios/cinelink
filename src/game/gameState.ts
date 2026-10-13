@@ -37,6 +37,7 @@ type GameStore = {
   initMode: (mode: GameMode) => Promise<void>;
   addHop: (nextPersonId: PersonId, movie: ChosenMovie) => Promise<{ ok: boolean; reason?: string; hop?: Hop }>;
   undoHop: () => boolean;
+  giveUp: () => boolean;
   tickSpeedRun: () => void;
   completeGame: (win: boolean) => Promise<void>;
   resetCurrentMode: () => Promise<void>;
@@ -222,6 +223,15 @@ export const useGameState = create<GameStore>((set, get) => ({
       path: state.path.slice(0, -1),
       hops: state.hops.slice(0, -1)
     });
+    return true;
+  },
+
+  giveUp: () => {
+    const state = get();
+    if (state.hasWon || state.hasLost || state.mode === 'daily') {
+      return false;
+    }
+    set({ hasLost: true });
     return true;
   },
 

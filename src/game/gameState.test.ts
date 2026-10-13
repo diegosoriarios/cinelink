@@ -328,6 +328,44 @@ describe('multi-day streaks', () => {
   });
 });
 
+describe('giveUp', () => {
+  it('ends an explorer round without counting a win or loss', async () => {
+    await state().initMode('explorer');
+    useGameState.setState({ explorerWins: 0 });
+
+    expect(state().giveUp()).toBe(true);
+    expect(state().hasLost).toBe(true);
+    expect(state().explorerWins).toBe(0);
+  });
+
+  it('stops the speedrun timer after giving up', async () => {
+    await state().initMode('speedrun');
+    const startedAt = state().speedRunStartedAt!;
+    useGameState.setState({ speedRunStartedAt: startedAt - 65000 });
+    state().tickSpeedRun();
+
+    expect(state().giveUp()).toBe(true);
+    const frozen = state().speedRunSeconds;
+    state().tickSpeedRun();
+    expect(state().speedRunSeconds).toBe(frozen);
+  });
+
+  it('is a no-op for daily mode', async () => {
+    useDate(DAILY_DATE);
+    await state().initMode('daily');
+
+    expect(state().giveUp()).toBe(false);
+    expect(state().hasLost).toBe(false);
+  });
+
+  it('is a no-op once the game is finished', async () => {
+    await state().initMode('explorer');
+    useGameState.setState({ hasWon: true });
+
+    expect(state().giveUp()).toBe(false);
+  });
+});
+
 describe('shareResult', () => {
   it('formats a won daily result with the hop count', async () => {
     useDate(DAILY_DATE);

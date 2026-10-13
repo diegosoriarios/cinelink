@@ -234,7 +234,8 @@ removed, so the step fails with `Failed to find package 'tools'`.
 Required repository variables/secrets (Settings → Secrets and variables → Actions):
 
 - `EXPO_PUBLIC_TMDB_API_KEY` (secret) — direct TMDB key baked into the app so native
-  single-player calls TMDB without the backend
+  single-player calls TMDB without the backend. **Required**: the release workflow fails
+  fast if it is missing, since an APK without it cannot load any game mode.
 - `EXPO_PUBLIC_RACE_URL` (variable) — deployed server URL for the realtime race API
   (e.g. `https://cinelink-server-10b9.onrender.com`); multiplayer only
 

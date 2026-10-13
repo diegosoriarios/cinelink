@@ -93,6 +93,12 @@ const getSameOriginProxy = (): string | null => {
   return origin && origin !== 'null' ? origin : null;
 };
 
+// Web always has the same-origin proxy available at runtime, so only native needs
+// explicit credentials. Treating web as configured also avoids a static-render
+// hydration mismatch (there is no `window` during the web export).
+export const isTmdbConfigured = (): boolean =>
+  Platform.OS === 'web' || Boolean(TMDB_PROXY_URL || API_KEY);
+
 const buildUrl = (path: string, params: Record<string, string | number | undefined> = {}) => {
   const proxyBase = resolveProxyBase(TMDB_PROXY_URL, API_KEY, getSameOriginProxy());
   if (!proxyBase && !API_KEY) {

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import puzzles from '../data/puzzles.json';
 import pool from '../data/tmdbPool.json';
-import { getMovieCredits, getPersonCredits, getPersonDetails } from '../api/tmdb';
+import { getMovieCredits, getPersonCredits, getPersonDetails, isTmdbConfigured } from '../api/tmdb';
 import { GameScreen } from '../screens/GameScreen';
 import { useGameState } from '../game/gameState';
 import { useIsWideScreen } from '../hooks/useIsWideScreen';
@@ -11,7 +11,8 @@ jest.mock('../api/tmdb', () => ({
   getImageUrl: jest.fn(() => null),
   getPersonDetails: jest.fn(),
   getPersonCredits: jest.fn(),
-  getMovieCredits: jest.fn()
+  getMovieCredits: jest.fn(),
+  isTmdbConfigured: jest.fn(() => true)
 }));
 
 jest.mock('../hooks/useIsWideScreen', () => ({
@@ -22,6 +23,7 @@ const mockedGetPersonDetails = getPersonDetails as jest.MockedFunction<typeof ge
 const mockedGetPersonCredits = getPersonCredits as jest.MockedFunction<typeof getPersonCredits>;
 const mockedGetMovieCredits = getMovieCredits as jest.MockedFunction<typeof getMovieCredits>;
 const mockedUseIsWideScreen = useIsWideScreen as jest.Mock;
+const mockedIsTmdbConfigured = isTmdbConfigured as jest.Mock;
 
 const DAILY_DATE = '2026-05-05';
 const FIXED_NOW = new Date(`${DAILY_DATE}T12:00:00Z`).getTime();
@@ -41,6 +43,7 @@ beforeEach(() => {
   jest.spyOn(Date.prototype, 'toISOString').mockReturnValue(`${DAILY_DATE}T12:00:00.000Z`);
   jest.spyOn(Date, 'now').mockReturnValue(FIXED_NOW);
   mockedUseIsWideScreen.mockReturnValue(false);
+  mockedIsTmdbConfigured.mockReturnValue(true);
   creditsFor = {};
   movieCreditsFor = {};
   mockedGetPersonDetails.mockImplementation(async (id: number) => {
@@ -283,4 +286,57 @@ it('shows an error card with retry when initialization fails', async () => {
   } finally {
     useGameState.setState({ initMode: originalInitMode });
   }
+});
+
+it('shows a configuration notice when TMDB is not configured', async () => {
+  mockedIsTmdbConfigured.mockReturnValue(false);
+  render(<GameScreen mode="daily" />);
+
+  expect(await screen.findByText('TMDB not configured')).toBeOnTheScreen();
+  expect(screen.queryByText('Current Path')).toBeNull();
+});
+
+const stubBrowserCredits = () => {
+  for (const person of pool as { id: number }[]) {
+    creditsFor[person.id] = { cast: [{ id: 101, title: 'Round Movie', release_date: '2015-01-01' }], crew: [] };
+  }
+};
+
+it('lets the player give up in explorer and start a new pair', async () => {
+  stubBrowserCredits();
+  render(<GameScreen mode="explorer" />);
+
+  await screen.findByText('Round Movie');
+  fireEvent.press(screen.getByText('Give up'));
+  fireEvent.press(screen.getByText('Yes'));
+
+  expect(await screen.findByText('Round skipped')).toBeOnTheScreen();
+  expect(useGameState.getState().hasLost).toBe(true);
+
+  fireEvent.press(screen.getByText('New pair →'));
+
+  expect(await screen.findByText('Select a movie to see its cast and directors')).toBeOnTheScreen();
+  expect(useGameState.getState().hasLost).toBe(false);
+  expect(useGameState.getState().path).toHaveLength(1);
+});
+
+it('lets the player give up in speed run and try again', async () => {
+  stubBrowserCredits();
+  render(<GameScreen mode="speedrun" />);
+
+  await screen.findByText('Round Movie');
+  fireEvent.press(screen.getByText('Give up'));
+  fireEvent.press(screen.getByText('Yes'));
+
+  expect(await screen.findByText('Run ended')).toBeOnTheScreen();
+  expect(screen.getByText('Try again')).toBeOnTheScreen();
+});
+
+it('does not offer give up in daily mode', async () => {
+  const puzzle = puzzleOf(DAILY_DATE);
+  creditsFor[puzzle.startId] = { cast: [{ id: 101, title: 'Round Movie', release_date: '2015-01-01' }], crew: [] };
+  render(<GameScreen mode="daily" />);
+
+  await screen.findByText('Round Movie');
+  expect(screen.queryByText('Give up')).toBeNull();
 });

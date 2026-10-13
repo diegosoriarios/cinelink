@@ -11,7 +11,7 @@ import {
   Text,
   View
 } from 'react-native';
-import { getPersonCredits, getPersonDetails } from '../api/tmdb';
+import { getPersonCredits, getPersonDetails, isTmdbConfigured } from '../api/tmdb';
 import { Avatar, CreditsBrowser } from '../components/CreditsBrowser';
 import { useGameState } from '../game/gameState';
 import { HINT_COUNT, pickHintMovies, type HintMovie } from '../game/hints';
@@ -76,6 +76,7 @@ export const GameScreen = ({ mode }: Props) => {
     initMode,
     addHop,
     undoHop,
+    giveUp,
     tickSpeedRun,
     shareResult,
     resetCurrentMode,
@@ -98,8 +99,10 @@ export const GameScreen = ({ mode }: Props) => {
   const [initError, setInitError] = useState<{ mode: GameMode; message: string } | null>(null);
   const [targetHints, setTargetHints] = useState<{ personId: number; movies: HintMovie[] } | null>(null);
   const [hintsShown, setHintsShown] = useState(0);
+  const [confirmGiveUpFor, setConfirmGiveUpFor] = useState<number | null>(null);
 
   const currentPersonId = path[path.length - 1];
+  const showGiveUpConfirm = confirmGiveUpFor === currentPersonId;
   const gameActive = !hasWon && !hasLost;
   const activeHints = targetHints && targetPerson && targetHints.personId === targetPerson.id ? targetHints.movies : null;
   const revealedCount = hasWon || hasLost ? HINT_COUNT : hintsShown;
@@ -199,6 +202,13 @@ export const GameScreen = ({ mode }: Props) => {
     }
   };
 
+  const onGiveUp = () => {
+    if (giveUp()) {
+      setMessage(null);
+    }
+    setConfirmGiveUpFor(null);
+  };
+
   const onNextRound = () => {
     setMessage(null);
     resetCurrentMode().catch(() => {
@@ -227,6 +237,17 @@ export const GameScreen = ({ mode }: Props) => {
     const sec = (speedRunSeconds % 60).toString().padStart(2, '0');
     return `${min}:${sec}`;
   }, [speedRunSeconds]);
+
+  if (!isTmdbConfigured()) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorTitle}>TMDB not configured</Text>
+        <Text style={styles.errorText}>
+          This build has no TMDB access. Set EXPO_PUBLIC_TMDB_API_KEY (or EXPO_PUBLIC_TMDB_PROXY_URL) and rebuild.
+        </Text>
+      </View>
+    );
+  }
 
   if (initError && initError.mode === mode) {
     return (
@@ -266,6 +287,23 @@ export const GameScreen = ({ mode }: Props) => {
         <Pressable onPress={onUndo} hitSlop={8}>
           <Text style={styles.undoText}>↩ Undo</Text>
         </Pressable>
+      ) : null}
+      {gameActive && mode !== 'daily' ? (
+        showGiveUpConfirm ? (
+          <View style={styles.confirmRow}>
+            <Text style={styles.confirmText}>Give up?</Text>
+            <Pressable onPress={onGiveUp} hitSlop={8}>
+              <Text style={styles.confirmYes}>Yes</Text>
+            </Pressable>
+            <Pressable onPress={() => setConfirmGiveUpFor(null)} hitSlop={8}>
+              <Text style={styles.confirmNo}>No</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={() => setConfirmGiveUpFor(currentPersonId)} hitSlop={8}>
+            <Text style={styles.giveUpText}>Give up</Text>
+          </Pressable>
+        )
       ) : null}
     </View>
   );
@@ -323,6 +361,23 @@ export const GameScreen = ({ mode }: Props) => {
       </View>
     ) : null;
 
+  const endRoundCard =
+    hasLost && mode !== 'daily' ? (
+      <View style={styles.endCard}>
+        <Text style={styles.endTitle}>{mode === 'speedrun' ? 'Run ended' : 'Round skipped'}</Text>
+        <Text style={styles.endText}>
+          {mode === 'speedrun'
+            ? `You gave up after ${hops.length} ${hops.length === 1 ? 'hop' : 'hops'} at ${timeLabel}.`
+            : `You gave up after ${hops.length} ${hops.length === 1 ? 'hop' : 'hops'}.`}
+        </Text>
+        <View style={styles.endActions}>
+          <Pressable style={[styles.button, styles.buttonNext]} onPress={onNextRound}>
+            <Text style={styles.buttonText}>{mode === 'speedrun' ? 'Try again' : 'New pair →'}</Text>
+          </Pressable>
+        </View>
+      </View>
+    ) : null;
+
   if (isWide) {
     return (
       <View style={[styles.root, styles.rootWide]}>
@@ -363,6 +418,7 @@ export const GameScreen = ({ mode }: Props) => {
             </View>
             {winCard}
             {lossCard}
+            {endRoundCard}
           </View>
           <View style={styles.browserPane}>
             {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -404,6 +460,7 @@ export const GameScreen = ({ mode }: Props) => {
       {browser}
       {winCard}
       {lossCard}
+      {endRoundCard}
     </View>
   );
 };
@@ -469,6 +526,11 @@ const styles = StyleSheet.create({
   hud: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
   hudText: { color: '#cbd5e1', fontSize: 14 },
   undoText: { color: '#93c5fd', fontWeight: '600' },
+  giveUpText: { color: '#fca5a5', fontWeight: '600' },
+  confirmRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  confirmText: { color: '#cbd5e1', fontSize: 14 },
+  confirmYes: { color: '#fca5a5', fontWeight: '700' },
+  confirmNo: { color: '#93c5fd', fontWeight: '600' },
   hintBox: { marginTop: 10, backgroundColor: '#0f172a', borderColor: '#1e293b', borderWidth: 1, borderRadius: 10, padding: 10, gap: 4 },
   hintTitle: { color: '#94a3b8', fontSize: 12, fontWeight: '600' },
   hintText: { color: '#fbbf24', fontSize: 13 },
