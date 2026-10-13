@@ -20,10 +20,9 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 
 ## Project Structure
 
-- `app/_layout.tsx` — root stack layout
-- `app/(tabs)/_layout.tsx` — tab layout (Home, Stats)
-- `app/(tabs)/index.tsx` — Home screen
-- `app/(tabs)/stats.tsx` — Stats screen
+- `app/_layout.tsx` — root shell (persistent TopNav + stack)
+- `app/index.tsx` — Home screen
+- `app/stats.tsx` — Stats screen
 - `app/game/[mode].tsx` — mode-based game route (`daily | explorer | speedrun`)
 - `src/screens/GameScreen.tsx` — core game UI and hop flow
 - `src/game/gameState.ts` — Zustand state management
@@ -196,15 +195,11 @@ Persistence keys:
 
 Expo Router file-based routing:
 
-- Home: `app/(tabs)/index.tsx`
-- Stats: `app/(tabs)/stats.tsx`
+- Home: `app/index.tsx`
+- Stats: `app/stats.tsx`
 - Game route by mode: `app/game/[mode].tsx`
 
-Tabs are configured in:
-
-- `app/(tabs)/_layout.tsx`
-
-Root stack in:
+A single persistent `TopNav` (in `app/_layout.tsx`) provides navigation on every screen. The root stack in:
 
 - `app/_layout.tsx`
 

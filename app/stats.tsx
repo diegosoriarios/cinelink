@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useGameState } from '../../src/game/gameState';
-import { useIsWideScreen } from '../../src/hooks/useIsWideScreen';
+import { useGameState } from '../src/game/gameState';
+import { useIsWideScreen } from '../src/hooks/useIsWideScreen';
 
 export default function StatsScreen() {
   const history = useGameState((s) => s.history);

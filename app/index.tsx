@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import puzzles from '../../src/data/puzzles.json';
-import posters from '../../src/data/posters.json';
-import { PosterBackground } from '../../src/components/PosterBackground';
-import { useGameState } from '../../src/game/gameState';
-import { useTodayISO } from '../../src/hooks/useTodayISO';
-import { isRaceConfigured } from '../../src/net/raceClient';
+import puzzles from '../src/data/puzzles.json';
+import posters from '../src/data/posters.json';
+import { PosterBackground } from '../src/components/PosterBackground';
+import { useGameState } from '../src/game/gameState';
+import { useTodayISO } from '../src/hooks/useTodayISO';
+import { isRaceConfigured } from '../src/net/raceClient';
 
 export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
