@@ -68,19 +68,20 @@ const memoryCache = new Map<string, CachedValue<unknown>>();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Prefer an explicit proxy, then a direct key (native), and finally the web app's
-// own origin so browsers use the bundled same-origin proxy without extra config.
+// Prefer a direct API key so the app talks to TMDB itself (local dev, native, and
+// web). Fall back to an explicit proxy, then the web app's own origin, only when no
+// key is configured.
 export const resolveProxyBase = (
   proxyUrl: string | undefined,
   apiKey: string | undefined,
   sameOrigin: string | null
 ): string | null => {
+  if (apiKey) {
+    return null;
+  }
   const explicit = proxyUrl?.replace(/\/$/, '') || null;
   if (explicit) {
     return explicit;
-  }
-  if (apiKey) {
-    return null;
   }
   return sameOrigin;
 };

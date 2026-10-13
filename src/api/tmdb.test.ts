@@ -54,7 +54,8 @@ describe('searchPerson', () => {
     expect(url.searchParams.get('include_adult')).toBe('false');
   });
 
-  it('routes through the proxy without leaking the api key', async () => {
+  it('routes through the proxy without leaking the api key when no key is set', async () => {
+    delete process.env.EXPO_PUBLIC_TMDB_API_KEY;
     process.env.EXPO_PUBLIC_TMDB_PROXY_URL = 'https://proxy.example.com/';
     const { tmdb, fetchMock } = importTmdb();
     fetchMock.mockResolvedValueOnce(makeResponse({ body: { results: [] } }));
@@ -65,6 +66,18 @@ describe('searchPerson', () => {
     expect(`${url.protocol}//${url.host}${url.pathname}`).toBe('https://proxy.example.com/tmdb/search/person');
     expect(url.searchParams.get('api_key')).toBeNull();
     expect(url.searchParams.get('query')).toBe('anne');
+  });
+
+  it('prefers the direct key over the proxy when both are configured', async () => {
+    process.env.EXPO_PUBLIC_TMDB_PROXY_URL = 'https://proxy.example.com/';
+    const { tmdb, fetchMock } = importTmdb();
+    fetchMock.mockResolvedValueOnce(makeResponse({ body: { results: [] } }));
+
+    await tmdb.searchPerson('anne');
+
+    const url = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(`${url.protocol}//${url.host}${url.pathname}`).toBe('https://api.themoviedb.org/3/search/person');
+    expect(url.searchParams.get('api_key')).toBe('test-key');
   });
 
   it('throws when neither api key nor proxy is configured', async () => {
@@ -235,9 +248,9 @@ describe('getImageUrl', () => {
 });
 
 describe('resolveProxyBase', () => {
-  it('prefers an explicit proxy and trims trailing slashes', async () => {
+  it('prefers the direct key over an explicit proxy', async () => {
     const { tmdb } = importTmdb();
-    expect(tmdb.resolveProxyBase('https://proxy.example.com/', 'key', 'https://web.example.com')).toBe('https://proxy.example.com');
+    expect(tmdb.resolveProxyBase('https://proxy.example.com', 'key', 'https://web.example.com')).toBeNull();
   });
 
   it('uses the direct key (no proxy) when only a key is configured', async () => {
@@ -245,7 +258,12 @@ describe('resolveProxyBase', () => {
     expect(tmdb.resolveProxyBase(undefined, 'key', 'https://web.example.com')).toBeNull();
   });
 
-  it('falls back to the same origin when nothing else is configured', async () => {
+  it('uses an explicit proxy (trimmed) when there is no key', async () => {
+    const { tmdb } = importTmdb();
+    expect(tmdb.resolveProxyBase('https://proxy.example.com/', undefined, 'https://web.example.com')).toBe('https://proxy.example.com');
+  });
+
+  it('falls back to the same origin when there is no key or proxy', async () => {
     const { tmdb } = importTmdb();
     expect(tmdb.resolveProxyBase(undefined, undefined, 'https://web.example.com')).toBe('https://web.example.com');
   });

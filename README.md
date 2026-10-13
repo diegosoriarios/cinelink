@@ -104,21 +104,26 @@ This validates:
 
 ### Environment variables
 
-- `EXPO_PUBLIC_TMDB_API_KEY` — direct TMDB API key. Used on native so single-player
-  calls TMDB directly (no backend), and for local web dev.
-- `EXPO_PUBLIC_TMDB_PROXY_URL` — optional explicit proxy base URL. If set, requests go
-  to `${EXPO_PUBLIC_TMDB_PROXY_URL}/tmdb/...`. On web, when unset, the app falls back to
-  its own origin (`/tmdb/...`), which the bundled Vercel function serves — so the key
-  stays server-side with no extra config. Otherwise requests go directly to TMDB.
+- `EXPO_PUBLIC_TMDB_API_KEY` — direct TMDB API key. When set, requests go straight to
+  `https://api.themoviedb.org` with no backend involved. Recommended for local dev,
+  native, and web. On web the key is visible in the JS bundle (client-side key).
+- `EXPO_PUBLIC_TMDB_PROXY_URL` — optional proxy base URL. Used **only when no key is
+  set**, as a fallback that keeps the key server-side (`${EXPO_PUBLIC_TMDB_PROXY_URL}/tmdb/...`).
+  On web with no key and no proxy, the app falls back to its own origin (`/tmdb/...`),
+  served by the bundled Vercel function.
 
 Resolution order (see `resolveProxyBase` in `src/api/tmdb.ts`):
-1. explicit `EXPO_PUBLIC_TMDB_PROXY_URL`
-2. direct `EXPO_PUBLIC_TMDB_API_KEY`
+1. direct `EXPO_PUBLIC_TMDB_API_KEY`
+2. explicit `EXPO_PUBLIC_TMDB_PROXY_URL`
 3. same-origin proxy on web (`window.location.origin`)
 
-This means **single-player never needs the race backend**: on native it talks to TMDB
-directly, and on web it uses the same-origin Vercel function. Only multiplayer
-(`EXPO_PUBLIC_RACE_URL`) requires the Render server.
+This means **single-player never needs the Render backend**: with a key configured it
+talks to TMDB directly on every platform; without a key, web uses the same-origin Vercel
+function and native requires the key/proxy. Only multiplayer (`EXPO_PUBLIC_RACE_URL`)
+requires the Render server.
+
+For local development, just set `EXPO_PUBLIC_TMDB_API_KEY` in `.env` (copy
+`.env.example`). No server or Render needed.
 
 ### API functions
 
@@ -283,12 +288,15 @@ git tag v1.0.0 && git push origin v1.0.0
 Vercel's Git integration deploys on push (no CI token required). Configure these
 environment variables in the Vercel project:
 
-- `TMDB_API_KEY` — server-side key used by the `api/tmdb/[...path].ts` function
+- `EXPO_PUBLIC_TMDB_API_KEY` — direct TMDB key so web calls TMDB itself (no Render, no
+  proxy). The key is public in the web bundle; this is the intended setup for CineLink.
 - `EXPO_PUBLIC_RACE_URL` — deployed server URL for the realtime race API (multiplayer)
 - `EXPO_PUBLIC_APP_URL` — public site URL (used for OG metadata)
 
-Web single-player needs no TMDB env var: it calls its own origin by default. Set
-`EXPO_PUBLIC_TMDB_PROXY_URL` only if you want web to use the Render proxy instead.
+Optional: if you ever prefer to keep the key server-side, unset `EXPO_PUBLIC_TMDB_API_KEY`
+instead. Web then calls its own origin (`/tmdb/*`), served by the bundled
+`api/tmdb/[...path].ts` function (`TMDB_API_KEY`). Setting `EXPO_PUBLIC_TMDB_PROXY_URL`
+routes web through that proxy (e.g. the Render server) instead.
 
 ### Open Graph metadata
 
@@ -332,13 +340,15 @@ a `vercel.json` rewrite (`/tmdb/:path*` → `/api/tmdb/:path*`). On Vercel, set 
 ### Single-player without the backend
 
 Daily / explorer / speedrun are fully client-side (bundled data + AsyncStorage). Their
-only network need is TMDB data:
+only network need is TMDB data, which comes straight from TMDB when
+`EXPO_PUBLIC_TMDB_API_KEY` is configured:
 
+- **Local dev** — set the key in `.env` and play; no server or Render required.
 - **Native** — calls TMDB directly with `EXPO_PUBLIC_TMDB_API_KEY`; the Render server is
   not involved.
-- **Web** — calls the same-origin Vercel Function (`/tmdb/*`), so a Render outage does
-  not affect single-player. Removing the whole key requirement is impossible on web
-  without a server component, because any key shipped to the browser is visible.
+- **Web** — calls TMDB directly with `EXPO_PUBLIC_TMDB_API_KEY` (the key is visible in the
+  bundle), so a Render outage does not affect single-player. If you'd rather hide the
+  key, leave it unset and web will use the same-origin Vercel Function (`/tmdb/*`).
 
 Only `EXPO_PUBLIC_RACE_URL` (multiplayer) depends on the Render server.
 
