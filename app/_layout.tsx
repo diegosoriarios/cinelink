@@ -2,14 +2,14 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { TopNav } from '../src/components/TopNav';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <>
       <StatusBar style="light" />
-      <View style={styles.shell}>
-        <TopNav />
+      <View style={[styles.shell, { paddingTop: insets.top }]}>
         <Stack
           screenOptions={{
             headerShown: false,
@@ -17,7 +17,6 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" />
-          <Stack.Screen name="stats" />
           <Stack.Screen name="game/[mode]" />
           <Stack.Screen name="game/race" />
         </Stack>

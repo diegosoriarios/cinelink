@@ -13,16 +13,15 @@ This project is built with **Expo + React Native + Expo Router + Zustand** and s
 - Speed Run mode (random pair with running timer)
 - TMDB integration with retries, cache, and persistence
 - Path validation engine using shared movie & TV credits
-- Stats and streak tracking persisted in AsyncStorage
+- Streak tracking persisted in AsyncStorage
 - Shareable emoji result strings
 - Web export + Vercel deployment config
 - Node server (`server/`) for TMDB proxy + realtime race rooms (Render deployment)
 
 ## Project Structure
 
-- `app/_layout.tsx` — root shell (persistent TopNav + stack)
+- `app/_layout.tsx` — root shell (stack + safe-area padding)
 - `app/index.tsx` — Home screen
-- `app/stats.tsx` — Stats screen
 - `app/game/[mode].tsx` — mode-based game route (`daily | explorer | speedrun`)
 - `src/screens/GameScreen.tsx` — core game UI and hop flow
 - `src/game/gameState.ts` — Zustand state management
@@ -196,10 +195,9 @@ Persistence keys:
 Expo Router file-based routing:
 
 - Home: `app/index.tsx`
-- Stats: `app/stats.tsx`
 - Game route by mode: `app/game/[mode].tsx`
 
-A single persistent `TopNav` (in `app/_layout.tsx`) provides navigation on every screen. The root stack in:
+The root stack in:
 
 - `app/_layout.tsx`
 

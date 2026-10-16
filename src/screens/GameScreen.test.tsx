@@ -183,13 +183,55 @@ it('expands the cast list beyond the preview limit', async () => {
 
 it("shows a retry when the current person's movies fail to load", async () => {
   mockedGetPersonCredits.mockRejectedValueOnce(new Error('network down'));
+  mockedGetPersonCredits.mockRejectedValueOnce(new Error('network down'));
+  mockedGetPersonCredits.mockRejectedValueOnce(new Error('network down'));
   render(<GameScreen mode="daily" />);
 
-  expect(await screen.findByText("Could not load this person's movies.")).toBeOnTheScreen();
+  expect(await screen.findByText("Could not load this person's movies.", {}, { timeout: 3000 })).toBeOnTheScreen();
 
   fireEvent.press(screen.getByText('Retry'));
 
   expect(await screen.findByText('No movies found. Use Undo to go back.')).toBeOnTheScreen();
+});
+
+it('recovers silently when the person movies fail only once', async () => {
+  const puzzle = puzzleOf(DAILY_DATE);
+  creditsFor[puzzle.startId] = { cast: [{ id: 101, title: 'Focus', release_date: '2015-02-27' }], crew: [] };
+  mockedGetPersonCredits.mockRejectedValueOnce(new Error('network down'));
+  render(<GameScreen mode="daily" />);
+
+  expect(await screen.findByText('Focus', {}, { timeout: 3000 })).toBeOnTheScreen();
+  expect(screen.queryByText("Could not load this person's movies.")).toBeNull();
+});
+
+it('recovers silently when the title credits fail only once', async () => {
+  const puzzle = puzzleOf(DAILY_DATE);
+  creditsFor[puzzle.startId] = { cast: [{ id: 101, title: 'Focus', release_date: '2015-02-27' }], crew: [] };
+  movieCreditsFor[101] = { cast: [{ id: 400, name: 'Cast Member', profile_path: null }], crew: [] };
+  mockedGetTitleCredits.mockRejectedValueOnce(new Error('network down'));
+  render(<GameScreen mode="daily" />);
+
+  fireEvent.press(await screen.findByText('Focus'));
+
+  expect(await screen.findByText('Cast Member', {}, { timeout: 3000 })).toBeOnTheScreen();
+  expect(screen.queryByText("Could not load this title's credits.")).toBeNull();
+});
+
+it("shows a retry when the title credits fail to load", async () => {
+  const puzzle = puzzleOf(DAILY_DATE);
+  creditsFor[puzzle.startId] = { cast: [{ id: 101, title: 'Focus', release_date: '2015-02-27' }], crew: [] };
+  movieCreditsFor[101] = { cast: [{ id: 400, name: 'Cast Member', profile_path: null }], crew: [] };
+  mockedGetTitleCredits.mockRejectedValueOnce(new Error('network down'));
+  mockedGetTitleCredits.mockRejectedValueOnce(new Error('network down'));
+  render(<GameScreen mode="daily" />);
+
+  fireEvent.press(await screen.findByText('Focus'));
+
+  expect(await screen.findByText("Could not load this title's credits.", {}, { timeout: 3000 })).toBeOnTheScreen();
+
+  fireEvent.press(screen.getByText('Retry'));
+
+  expect(await screen.findByText('Cast Member')).toBeOnTheScreen();
 });
 
 it('reveals target hints progressively and hides the button when none are left', async () => {

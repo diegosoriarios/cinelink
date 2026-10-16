@@ -1,10 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  type StyleProp,
+  type ViewStyle
+} from 'react-native';
 import { getImageUrl, getPersonCredits, getTitleCredits, type PersonCreditsResponse } from '../api/tmdb';
 import { mediaKey } from '../game/media';
 import type { MovieLite, PersonId, PersonLite } from '../types/game';
 
 const CAST_PREVIEW_COUNT = 15;
+const SILENT_RETRY_DELAY_MS = 800;
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const releaseTime = (movie: MovieLite) => (movie.release_date ? Date.parse(movie.release_date) : 0);
 
@@ -91,28 +106,57 @@ type Props = {
   personName: string;
   targetPersonId: PersonId | null;
   onHop: (person: PersonLite, movie: MovieLite) => boolean | Promise<boolean>;
+  scrollOffsets?: Map<string, number>;
   style?: StyleProp<ViewStyle>;
 };
 
-export const CreditsBrowser = ({ personId, personName, targetPersonId, onHop, style }: Props) => {
+export const CreditsBrowser = ({ personId, personName, targetPersonId, onHop, scrollOffsets, style }: Props) => {
   const [personState, setPersonState] = useState<PersonCreditsState | null>(null);
   const [creditsToken, setCreditsToken] = useState(0);
   const [picked, setPicked] = useState<MovieLite | null>(null);
   const [titleState, setTitleState] = useState<TitleCreditsState | null>(null);
+  const [titleCreditsToken, setTitleCreditsToken] = useState(0);
   const [showFullCast, setShowFullCast] = useState(false);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const [localOffsets] = useState(() => new Map<string, number>());
+  const offsets = scrollOffsets ?? localOffsets;
+  const pendingRestoreRef = useRef<{ key: string; y: number } | null>(null);
+
+  const viewKey = picked ? `${personId}:${picked.mediaType}:${picked.id}` : `${personId}:titles`;
+
+  const activePerson = personState && personState.personId === personId ? personState : null;
+  const titles = activePerson && !activePerson.error ? activePerson.titles : null;
+  const titlesLoading = !activePerson;
+  const titlesError = activePerson?.error === true;
+  const activeTitle = titleState && picked && titleState.id === picked.id && titleState.mediaType === picked.mediaType ? titleState : null;
+  const visibleCast =
+    activeTitle && !activeTitle.error ? (showFullCast ? activeTitle.cast : activeTitle.cast.slice(0, CAST_PREVIEW_COUNT)) : [];
+  const creatorLabel = picked?.mediaType === 'tv' ? 'Creators' : 'Directors';
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      try {
-        const credits = await getPersonCredits(personId);
-        if (!cancelled) {
-          setPersonState({ personId, titles: normalizeTitles(credits), error: false });
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const credits = await getPersonCredits(personId);
+          if (!cancelled) {
+            setPersonState({ personId, titles: normalizeTitles(credits), error: false });
+          }
+          return;
+        } catch {
+          if (cancelled) {
+            return;
+          }
+          if (attempt === 0) {
+            await delay(SILENT_RETRY_DELAY_MS);
+            if (cancelled) {
+              return;
+            }
+          }
         }
-      } catch {
-        if (!cancelled) {
-          setPersonState({ personId, titles: [], error: true });
-        }
+      }
+      if (!cancelled) {
+        setPersonState({ personId, titles: [], error: true });
       }
     };
     run();
@@ -127,31 +171,56 @@ export const CreditsBrowser = ({ personId, personName, targetPersonId, onHop, st
     }
     let cancelled = false;
     const run = async () => {
-      try {
-        const credits = await getTitleCredits(picked.mediaType, picked.id);
-        if (!cancelled) {
-          setTitleState({ mediaType: picked.mediaType, id: picked.id, creators: credits.creators, cast: credits.cast, error: false });
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const credits = await getTitleCredits(picked.mediaType, picked.id);
+          if (!cancelled) {
+            setTitleState({ mediaType: picked.mediaType, id: picked.id, creators: credits.creators, cast: credits.cast, error: false });
+          }
+          return;
+        } catch {
+          if (cancelled) {
+            return;
+          }
+          if (attempt === 0) {
+            await delay(SILENT_RETRY_DELAY_MS);
+            if (cancelled) {
+              return;
+            }
+          }
         }
-      } catch {
-        if (!cancelled) {
-          setTitleState({ mediaType: picked.mediaType, id: picked.id, creators: [], cast: [], error: true });
-        }
+      }
+      if (!cancelled) {
+        setTitleState({ mediaType: picked.mediaType, id: picked.id, creators: [], cast: [], error: true });
       }
     };
     run();
     return () => {
       cancelled = true;
     };
-  }, [picked]);
+  }, [picked, titleCreditsToken]);
 
-  const activePerson = personState && personState.personId === personId ? personState : null;
-  const titles = activePerson && !activePerson.error ? activePerson.titles : null;
-  const titlesLoading = !activePerson;
-  const titlesError = activePerson?.error === true;
-  const activeTitle = titleState && picked && titleState.id === picked.id && titleState.mediaType === picked.mediaType ? titleState : null;
-  const visibleCast =
-    activeTitle && !activeTitle.error ? (showFullCast ? activeTitle.cast : activeTitle.cast.slice(0, CAST_PREVIEW_COUNT)) : [];
-  const creatorLabel = picked?.mediaType === 'tv' ? 'Creators' : 'Directors';
+  useEffect(() => {
+    const saved = offsets.get(viewKey);
+    pendingRestoreRef.current = saved && saved > 0 ? { key: viewKey, y: saved } : null;
+  }, [viewKey, offsets]);
+
+  useEffect(() => {
+    const pending = pendingRestoreRef.current;
+    if (!pending || pending.key !== viewKey) {
+      return;
+    }
+    const contentReady = picked ? !!activeTitle && !activeTitle.error : !!titles;
+    if (!contentReady) {
+      return;
+    }
+    const target = pending.y;
+    const frame = requestAnimationFrame(() => {
+      pendingRestoreRef.current = null;
+      scrollRef.current?.scrollTo({ y: target, animated: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  });
 
   const onSelectPerson = async (person: PersonLite) => {
     if (!picked) {
@@ -171,13 +240,22 @@ export const CreditsBrowser = ({ personId, personName, targetPersonId, onHop, st
     setPicked(movie);
   };
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    offsets.set(viewKey, event.nativeEvent.contentOffset.y);
+  };
+
   const retryMovies = () => {
     setPersonState(null);
     setCreditsToken((token) => token + 1);
   };
 
+  const retryTitle = () => {
+    setTitleState(null);
+    setTitleCreditsToken((token) => token + 1);
+  };
+
   return (
-    <ScrollView style={[styles.browser, style]}>
+    <ScrollView ref={scrollRef} style={[styles.browser, style]} onScroll={handleScroll} scrollEventThrottle={16}>
       {picked ? (
         <View>
           <View style={styles.browserHeader}>
@@ -190,7 +268,14 @@ export const CreditsBrowser = ({ personId, personName, targetPersonId, onHop, st
             </Pressable>
           </View>
           {!activeTitle ? <ActivityIndicator color="#cbd5e1" style={styles.loader} /> : null}
-          {activeTitle?.error ? <Text style={styles.errorMessage}>Could not load this title's credits.</Text> : null}
+          {activeTitle?.error ? (
+            <View>
+              <Text style={styles.errorMessage}>Could not load this title's credits.</Text>
+              <Pressable style={styles.linkButton} onPress={retryTitle}>
+                <Text style={styles.linkButtonText}>Retry</Text>
+              </Pressable>
+            </View>
+          ) : null}
           {activeTitle && !activeTitle.error ? (
             <View>
               {activeTitle.creators.length > 0 ? <Text style={styles.groupTitle}>{creatorLabel}</Text> : null}

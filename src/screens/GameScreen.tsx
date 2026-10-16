@@ -104,6 +104,7 @@ export const GameScreen = ({ mode }: Props) => {
   const currentPersonId = path[path.length - 1];
   const showGiveUpConfirm = confirmGiveUpFor === currentPersonId;
   const gameActive = !hasWon && !hasLost;
+  const [scrollOffsets] = useState(() => new Map<string, number>());
   const activeHints = targetHints && targetPerson && targetHints.personId === targetPerson.id ? targetHints.movies : null;
   const revealedCount = hasWon || hasLost ? HINT_COUNT : hintsShown;
   const revealedHints = activeHints ? activeHints.slice(0, revealedCount) : [];
@@ -330,6 +331,7 @@ export const GameScreen = ({ mode }: Props) => {
       personName={personMap[currentPersonId]?.name ?? startPerson.name}
       targetPersonId={targetPerson?.id ?? null}
       onHop={onHop}
+      scrollOffsets={scrollOffsets}
     />
   ) : null;
 
