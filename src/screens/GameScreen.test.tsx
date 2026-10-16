@@ -30,6 +30,9 @@ const FIXED_NOW = new Date(`${DAILY_DATE}T12:00:00Z`).getTime();
 
 const puzzleOf = (date: string) => (puzzles as PuzzleEntry[]).find((p) => p.date === date)!;
 
+const initialGameState = useGameState.getState();
+const resetStorage = () => (globalThis as unknown as { __resetMockAsyncStorage: () => void }).__resetMockAsyncStorage();
+
 let creditsFor: Record<
   number,
   { cast: { id: number; title: string; release_date?: string; popularity?: number }[]; crew: { id: number; title: string; job: string; department: string }[] }
@@ -40,6 +43,8 @@ let movieCreditsFor: Record<
 >;
 
 beforeEach(() => {
+  useGameState.setState(initialGameState, true);
+  resetStorage();
   jest.spyOn(Date.prototype, 'toISOString').mockReturnValue(`${DAILY_DATE}T12:00:00.000Z`);
   jest.spyOn(Date, 'now').mockReturnValue(FIXED_NOW);
   mockedUseIsWideScreen.mockReturnValue(false);

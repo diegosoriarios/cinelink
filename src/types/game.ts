@@ -27,6 +27,7 @@ export type PuzzleHistoryEntry = {
   win: boolean;
   hopsUsed: number;
   completedAt: string;
+  hops?: Hop[];
 };
 
 export type PersonLite = {

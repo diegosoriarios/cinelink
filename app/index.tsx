@@ -11,6 +11,7 @@ import { isRaceConfigured } from '../src/net/raceClient';
 export default function HomeScreen() {
   const initMode = useGameState((s) => s.initMode);
   const streak = useGameState((s) => s.streak);
+  const history = useGameState((s) => s.history);
   const raceAvailable = isRaceConfigured();
   const today = useTodayISO();
   const puzzle = useMemo(
@@ -19,6 +20,10 @@ export default function HomeScreen() {
         ? (puzzles as { date: string; startName: string; endName: string }[]).find((p) => p.date === today)
         : undefined,
     [today]
+  );
+  const todayResult = useMemo(
+    () => (today ? history.find((entry) => entry.date === today && entry.mode === 'daily') : undefined),
+    [history, today]
   );
   const posterPaths = useMemo(() => (posters as { poster_path: string }[]).map((entry) => entry.poster_path), []);
 
@@ -38,8 +43,15 @@ export default function HomeScreen() {
           <Text style={styles.label}>Today’s Daily Puzzle</Text>
           <Text style={styles.pair}>{puzzle?.startName ?? 'Start'} → {puzzle?.endName ?? 'Target'}</Text>
           <Text style={styles.streak}>Current streak: {streak}</Text>
+          {todayResult ? (
+            <Text style={todayResult.win ? styles.completedText : styles.failedText}>
+              {todayResult.win ? 'Completed today ✓' : 'Failed — come back tomorrow'}
+            </Text>
+          ) : null}
           <Link href="/game/daily" asChild>
-            <Pressable style={styles.primaryButton}><Text style={styles.primaryText}>Play Daily</Text></Pressable>
+            <Pressable style={styles.primaryButton}>
+              <Text style={styles.primaryText}>{todayResult ? 'View today’s result' : 'Play Daily'}</Text>
+            </Pressable>
           </Link>
         </View>
 
@@ -79,6 +91,8 @@ const styles = StyleSheet.create({
   label: { color: '#cbd5e1', fontWeight: '700' },
   pair: { color: '#e2e8f0', fontSize: 17, fontWeight: '600' },
   streak: { color: '#93c5fd' },
+  completedText: { color: '#34d399', fontWeight: '700' },
+  failedText: { color: '#fca5a5', fontWeight: '700' },
   primaryButton: { backgroundColor: '#2563eb', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   primaryText: { color: '#f8fafc', fontWeight: '700' },
   secondaryButton: {

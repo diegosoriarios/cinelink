@@ -302,6 +302,91 @@ describe('completeGame guards', () => {
   });
 });
 
+describe('daily completion persistence', () => {
+  it('restores a won daily game with its hops after re-initializing', async () => {
+    useDate(DAILY_DATE);
+    const puzzle = puzzleOf(DAILY_DATE);
+    await state().initMode('daily');
+    await state().addHop(puzzle.endId, movieFor(puzzle.endId));
+    expect(state().hasWon).toBe(true);
+
+    await state().initMode('daily');
+
+    expect(state().hasWon).toBe(true);
+    expect(state().hasLost).toBe(false);
+    expect(state().hops).toHaveLength(1);
+    expect(state().hops[0]).toMatchObject({
+      fromPersonId: puzzle.startId,
+      toPersonId: puzzle.endId,
+      sharedMediaTitle: `Movie ${puzzle.endId}`
+    });
+    expect(state().path).toEqual([puzzle.startId, puzzle.endId]);
+    expect(state().streak).toBe(1);
+
+    const stored = JSON.parse(storage().get('cinelink:history')!);
+    expect(stored[0].hops).toHaveLength(1);
+  });
+
+  it('restores a lost daily game after re-initializing', async () => {
+    useDate(DAILY_DATE);
+    await state().initMode('daily');
+    for (let hop = 1; hop <= state().maxHops; hop += 1) {
+      await state().addHop(200 + hop, movieFor(200 + hop));
+    }
+    expect(state().hasLost).toBe(true);
+
+    await state().initMode('daily');
+
+    expect(state().hasLost).toBe(true);
+    expect(state().hasWon).toBe(false);
+    expect(state().hops).toHaveLength(state().maxHops);
+    expect(state().streak).toBe(0);
+  });
+
+  it('keeps the finished daily state when resetCurrentMode is called', async () => {
+    useDate(DAILY_DATE);
+    await state().initMode('daily');
+    await state().addHop(puzzleOf(DAILY_DATE).endId, movieFor(puzzleOf(DAILY_DATE).endId));
+
+    await state().resetCurrentMode();
+
+    expect(state().hasWon).toBe(true);
+    expect(state().hops).toHaveLength(1);
+  });
+
+  it('restores the finished state for legacy entries saved without hops', async () => {
+    useDate(DAILY_DATE);
+    storage().set(
+      'cinelink:history',
+      JSON.stringify([
+        { date: DAILY_DATE, mode: 'daily', win: true, hopsUsed: 3, completedAt: `${DAILY_DATE}T10:00:00.000Z` }
+      ])
+    );
+
+    await state().initMode('daily');
+
+    expect(state().hasWon).toBe(true);
+    expect(state().hasLost).toBe(false);
+    expect(state().hops).toEqual([]);
+    expect(state().path).toEqual([puzzleOf(DAILY_DATE).startId]);
+  });
+
+  it('starts a fresh board the next day after a completed daily', async () => {
+    useDate(DAILY_DATE);
+    await state().initMode('daily');
+    await state().addHop(puzzleOf(DAILY_DATE).endId, movieFor(puzzleOf(DAILY_DATE).endId));
+    expect(state().hasWon).toBe(true);
+
+    useDate(NEXT_DATE);
+    await state().initMode('daily');
+
+    expect(state().hasWon).toBe(false);
+    expect(state().hasLost).toBe(false);
+    expect(state().hops).toHaveLength(0);
+    expect(state().path).toEqual([puzzleOf(NEXT_DATE).startId]);
+  });
+});
+
 describe('multi-day streaks', () => {
   it('grows the streak across consecutive wins and preserves bestStreak after a loss', async () => {
     useDate(DAILY_DATE);

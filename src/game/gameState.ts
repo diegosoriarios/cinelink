@@ -133,16 +133,25 @@ export const useGameState = create<GameStore>((set, get) => ({
       const puzzle = getPuzzleByDate(today);
       const startPerson = puzzle ? await toPreview(puzzle.startId, puzzle.startName) : null;
       const targetPerson = puzzle ? await toPreview(puzzle.endId, puzzle.endName) : null;
+      const playedToday = stats.history.find((entry) => entry.date === today && entry.mode === 'daily');
+      const restoredHops = playedToday?.hops ?? [];
+      const restoredPath =
+        restoredHops.length > 0
+          ? [restoredHops[0].fromPersonId, ...restoredHops.map((hop) => hop.toPersonId)]
+          : puzzle
+            ? [puzzle.startId]
+            : [];
+
       set({
         mode,
         today,
         puzzle,
         startPerson,
         targetPerson,
-        path: puzzle ? [puzzle.startId] : [],
-        hops: [],
-        hasWon: false,
-        hasLost: false,
+        path: restoredPath,
+        hops: restoredHops,
+        hasWon: playedToday ? playedToday.win : false,
+        hasLost: playedToday ? !playedToday.win : false,
         speedRunSeconds: 0,
         speedRunStartedAt: null,
         history: stats.history,
@@ -270,7 +279,8 @@ export const useGameState = create<GameStore>((set, get) => ({
         mode: 'daily' as GameMode,
         win,
         hopsUsed: state.hops.length,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        hops: state.hops
       }
     ].sort((a, b) => a.date.localeCompare(b.date));
 
