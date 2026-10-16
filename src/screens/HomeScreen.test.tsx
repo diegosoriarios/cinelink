@@ -23,7 +23,7 @@ it('renders the home screen with play actions', () => {
   try {
     render(<HomeScreen />);
 
-    expect(screen.getByText('CineLink')).toBeOnTheScreen();
+    expect(screen.getByLabelText('CineLink')).toBeOnTheScreen();
     expect(screen.getByText('Play Daily')).toBeOnTheScreen();
     expect(screen.getByText('Explorer Mode')).toBeOnTheScreen();
     expect(screen.getByText('Speed Run')).toBeOnTheScreen();

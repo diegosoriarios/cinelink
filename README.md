@@ -448,6 +448,6 @@ npm run verify:data
 
 ## Notes
 
-- Current image assets in `public/assets` are placeholders and should be replaced with production-ready art.
+- Brand assets: `assets/logo.svg` / `assets/logo.webp` are the source files; `public/assets/*.png` are generated from them (icon 1024, favicon 48, splash 1024, og-image 1200x630). `assets/logo.png` (512) is used in-app on the Home screen. App theme color is `#0B0E12`.
 - Daily lose state supports `shortestPath` if present in puzzle entries.
 - `puzzles.json` is also duplicated at repo root for convenience.

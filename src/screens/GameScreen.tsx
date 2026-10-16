@@ -478,7 +478,7 @@ const PersonCard = ({ label, name, profilePath }: { label: string; name: string;
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#020617', padding: 16, maxWidth: 720, width: '100%', alignSelf: 'center' },
+  root: { flex: 1, backgroundColor: '#0B0E12', padding: 16, maxWidth: 720, width: '100%', alignSelf: 'center' },
   rootWide: { maxWidth: 1080 },
   desktopColumns: { flex: 1, flexDirection: 'row', gap: 20 },
   rail: { width: 340, flexShrink: 0 },
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   },
   timelineEdgeText: { color: '#e2e8f0', fontSize: 12 },
   timelineEdgePending: { backgroundColor: 'transparent', borderWidth: 1, borderColor: '#475569', borderStyle: 'dashed' },
-  centered: { flex: 1, backgroundColor: '#020617', alignItems: 'center', justifyContent: 'center' },
+  centered: { flex: 1, backgroundColor: '#0B0E12', alignItems: 'center', justifyContent: 'center' },
   errorTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
   errorText: { color: '#cbd5e1', fontSize: 14, marginBottom: 12, textAlign: 'center' },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
   personRowTarget: { borderColor: '#22d3ee', borderWidth: 2 },
   personRowName: { color: '#e2e8f0', fontSize: 14, flexShrink: 1 },
   targetBadge: { backgroundColor: '#22d3ee', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  targetBadgeText: { color: '#020617', fontSize: 10, fontWeight: '800' },
+  targetBadgeText: { color: '#0B0E12', fontSize: 10, fontWeight: '800' },
   linkButton: { alignSelf: 'flex-start', paddingVertical: 8, marginBottom: 8 },
   linkButtonText: { color: '#93c5fd', fontWeight: '600' },
   loader: { marginTop: 12 },

@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
-    backgroundColor: '#020617'
+    backgroundColor: '#0B0E12'
   },
   column: {
     position: 'absolute',

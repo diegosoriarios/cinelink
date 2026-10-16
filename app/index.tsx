@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import puzzles from '../src/data/puzzles.json';
 import posters from '../src/data/posters.json';
 import { PosterBackground } from '../src/components/PosterBackground';
@@ -36,7 +36,11 @@ export default function HomeScreen() {
       <PosterBackground paths={posterPaths} />
       <View style={styles.overlay} pointerEvents="none" />
       <View style={styles.content}>
-        <Text style={styles.title}>CineLink</Text>
+        <Image
+          source={require('../assets/logo.png')}
+          style={styles.logo}
+          accessibilityLabel="CineLink"
+        />
         <Text style={styles.subtitle}>Connect stars through shared movie credits</Text>
 
         <View style={styles.dailyCard}>
@@ -74,10 +78,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#020617', padding: 20, justifyContent: 'center', overflow: 'hidden' },
+  container: { flex: 1, backgroundColor: '#0B0E12', padding: 20, justifyContent: 'center', overflow: 'hidden' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,6,23,0.82)' },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', zIndex: 1 },
-  title: { color: '#f8fafc', fontSize: 40, fontWeight: '800', marginBottom: 8 },
+  logo: { width: 160, height: 160, borderRadius: 24, marginBottom: 16 },
   subtitle: { color: '#94a3b8', fontSize: 15, marginBottom: 20 },
   dailyCard: {
     backgroundColor: '#0f172a',

@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   personRowTarget: { borderColor: '#22d3ee', borderWidth: 2 },
   personRowName: { color: '#e2e8f0', fontSize: 14, flexShrink: 1 },
   targetBadge: { backgroundColor: '#22d3ee', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  targetBadgeText: { color: '#020617', fontSize: 10, fontWeight: '800' },
+  targetBadgeText: { color: '#0B0E12', fontSize: 10, fontWeight: '800' },
   linkButton: { alignSelf: 'flex-start', paddingVertical: 8, marginBottom: 8 },
   linkButtonText: { color: '#93c5fd', fontWeight: '600' },
   loader: { marginTop: 12 },

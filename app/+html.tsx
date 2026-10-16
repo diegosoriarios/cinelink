@@ -12,8 +12,10 @@ export default function Root({ children }: PropsWithChildren) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="theme-color" content="#020617" />
+        <meta name="theme-color" content="#0B0E12" />
         <meta name="description" content={DESCRIPTION} />
+        <link rel="icon" href="/assets/favicon.png" />
+        <link rel="apple-touch-icon" href="/assets/icon.png" />
         <title>CineLink</title>
 
         <meta property="og:type" content="website" />
@@ -29,7 +31,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="twitter:image" content={OG_IMAGE} />
 
         <ScrollViewStyleReset />
-        <style dangerouslySetInnerHTML={{ __html: 'html, body, #root { height: 100%; margin: 0; background-color: #020617; }' }} />
+        <style dangerouslySetInnerHTML={{ __html: 'html, body, #root { height: 100%; margin: 0; background-color: #0B0E12; }' }} />
       </head>
       <body>{children}</body>
     </html>

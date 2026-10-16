@@ -408,7 +408,7 @@ export const RaceScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#020617', padding: 16, maxWidth: 720, width: '100%', alignSelf: 'center' },
+  root: { flex: 1, backgroundColor: '#0B0E12', padding: 16, maxWidth: 720, width: '100%', alignSelf: 'center' },
   rootWide: { maxWidth: 1080 },
   desktopColumns: { flex: 1, flexDirection: 'row', gap: 20 },
   rail: { width: 340, flexShrink: 0 },
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   browserPane: { flex: 1 },
   browser: { marginTop: 0 },
   entryContainer: { padding: 20, maxWidth: 560, width: '100%', alignSelf: 'center', gap: 10 },
-  centered: { flex: 1, backgroundColor: '#020617', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 10 },
+  centered: { flex: 1, backgroundColor: '#0B0E12', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 10 },
   title: { color: '#f8fafc', fontSize: 26, fontWeight: '800', textAlign: 'center' },
   subtitle: { color: '#94a3b8', fontSize: 15, textAlign: 'center' },
   errorTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700', textAlign: 'center' },

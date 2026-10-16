@@ -3,14 +3,14 @@
     "name": "CineLink",
     "slug": "cinelink",
     "scheme": "cinelink",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./public/assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./public/assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#020617"
+      "backgroundColor": "#0B0E12"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./public/assets/adaptive-icon.png",
-        "backgroundColor": "#020617"
+        "backgroundColor": "#0B0E12"
       },
       "package": "com.cinelink.app"
     },
